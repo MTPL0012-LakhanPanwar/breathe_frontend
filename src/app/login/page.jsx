@@ -1,121 +1,130 @@
-const LoginForm = ({ onSwitchToSignup }) => {
-    const [formData, setFormData] = useState({
-      username: '',
-      password: ''
-    });
-    const [errors, setErrors] = useState({});
-    const [showPassword, setShowPassword] = useState(false);
-    const { login, isLoading, error } = useAuthStore();
-  
-    const handleChange = (e) => {
-      const { name, value } = e.target;
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-      
-      if (errors[name]) {
-        setErrors(prev => ({
-          ...prev,
-          [name]: ''
-        }));
-      }
-    };
-  
-    const validateForm = () => {
-      const newErrors = {};
-      
-      if (!formData.username.trim()) {
-        newErrors.username = 'Username is required';
-      }
-      
-      if (!formData.password) {
-        newErrors.password = 'Password is required';
-      }
-      
-      setErrors(newErrors);
-      return Object.keys(newErrors).length === 0;
-    };
-  
-    const handleSubmit = async () => {
-      if (!validateForm()) return;
-      
-      await login(formData);
-    };
-  
-    return (
-      <div className="space-y-6">
-        <div className="text-center space-y-2">
-          <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
-          <p className="text-gray-600">Sign in to your account to continue</p>
-        </div>
-  
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-3">
-            <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
-            <span className="text-red-700">{error}</span>
-          </div>
-        )}
-  
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import useAuthStore from "@/lib/auth-store";
+import { Mail, Lock } from "lucide-react";
+import SocialLoginButtons from "@/components/SocialLoginButtons";
+import InputField from "@/components/InputField";
+import Button from "@/components/Button";
+import Link from "next/link";
+import Image from "next/image";
+
+export default function LoginForm() {
+  const router = useRouter();
+  const { login, isLoading, error } = useAuthStore();
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
+
+  const validateForm = () => {
+    const errors = {};
+    if (!formData.username.trim()) {
+      errors.username = "Username is required";
+    }
+    if (!formData.password) {
+      errors.password = "Password is required";
+    } else if (formData.password.length < 6) {
+      errors.password = "Password must be at least 6 characters";
+    }
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear validation error when user types
+    if (validationErrors[name]) {
+      setValidationErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    const result = await login(formData);
+    if (result.success) {
+      router.push("/dashboard");
+    }
+  };
+
+  return (
+    <div className="max-w-md w-full space-y-8 p-6 bg-white rounded-xl shadow-lg">
+      <div className="text-center">
+        <Image
+          src="/logo.svg"
+          alt="BREATHE AI"
+          width={48}
+          height={48}
+          className="mx-auto h-12 w-auto"
+        />
+        <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
+        <p className="mt-2 text-sm text-gray-600">
+          Or{" "}
+          <Link href="/signup" className="font-medium text-green-600 hover:text-green-500">
+            create a new account
+          </Link>
+        </p>
+      </div>
+
+      <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
         <div className="space-y-4">
           <InputField
-            icon={User}
+            icon={Mail}
             type="text"
             name="username"
-            placeholder="Enter your username or email"
             value={formData.username}
             onChange={handleChange}
-            error={errors.username}
+            error={validationErrors.username}
+            placeholder="Enter your username"
           />
-  
+
           <InputField
             icon={Lock}
             type="password"
             name="password"
-            placeholder="Enter your password"
             value={formData.password}
             onChange={handleChange}
-            error={errors.password}
+            error={validationErrors.password}
+            placeholder="Enter your password"
             showPasswordToggle={true}
-            showPassword={showPassword}
             onTogglePassword={() => setShowPassword(!showPassword)}
+            showPassword={showPassword}
           />
-  
-          <button
-            type="button"
-            disabled={isLoading}
-            onClick={handleSubmit}
-            className="
-              w-full bg-gradient-to-r from-green-500 to-green-600 
-              hover:from-green-600 hover:to-green-700
-              text-white font-medium py-3 px-4 rounded-lg
-              transition-all duration-300 ease-in-out
-              focus:outline-none focus:ring-4 focus:ring-green-500/20
-              disabled:opacity-70 disabled:cursor-not-allowed
-              transform hover:scale-[1.02] active:scale-[0.98]
-            "
-          >
-            {isLoading ? (
-              <div className="flex items-center justify-center space-x-2">
-                <Loader className="h-5 w-5 animate-spin" />
-                <span>Signing in...</span>
-              </div>
-            ) : (
-              'Sign In'
-            )}
-          </button>
         </div>
-  
-        <div className="text-center">
-          <span className="text-gray-600">Don't have an account? </span>
-          <button
-            onClick={onSwitchToSignup}
-            className="text-green-600 hover:text-green-700 font-medium transition-colors duration-200"
-          >
-            Sign up
-          </button>
+
+        <Button
+          type="submit"
+          isLoading={isLoading}
+          fullWidth
+        >
+          Sign in
+        </Button>
+
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
+      </form>
+
+      <div className="mt-6">
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-gray-500">Or continue with</span>
+          </div>
         </div>
+
+        <SocialLoginButtons />
       </div>
-    );
-  };
+    </div>
+  );
+}
   

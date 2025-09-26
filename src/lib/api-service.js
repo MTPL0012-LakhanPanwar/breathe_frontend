@@ -73,10 +73,22 @@ const apiService = {
       body: userData,
     });
   },
+  
+  // Social login endpoint
+  async socialLogin(provider, token) {
+    return this.makeRequest("/social-login", {
+      method: "POST",
+      body: { provider, token },
+    });
+  },
 
   // Admin endpoints
-  async getUsers(token) {
-    return this.makeRequest("/admin/users", { method: "GET" }, token);
+  async getUsers(token, page = 1, filter = null) {
+    let url = `/admin/users?page=${page}`;
+    if (filter) {
+      url += `&filter=${filter}`;
+    }
+    return this.makeRequest(url, { method: "GET" }, token);
   },
 
   async updateUserApproval(userId, isApproved, token) {
@@ -116,5 +128,10 @@ const apiService = {
       },
       token
     );
+  },
+  
+  // Chat history
+  async getChatHistory(token) {
+    return this.makeRequest("/chat/history", { method: "GET" }, token);
   },
 };

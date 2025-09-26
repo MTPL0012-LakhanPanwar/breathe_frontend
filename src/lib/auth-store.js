@@ -98,9 +98,95 @@ const useAuthStore = (() => {
       setState({
         isLoading: false,
         error: error.message || "Login failed",
+      });
+      return { success: false, error };
+    }
+  };
+  
+  // Social login implementation
+  const socialLogin = async ({ provider }) => {
+    setState({ isLoading: true, error: null });
+    
+    try {
+      // For OAuth providers, we would typically redirect to their auth page
+      // This is a simplified implementation
+      const authWindow = window.open(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/${provider}`,
+        '_blank',
+        'width=600,height=600'
+      );
+      
+      // Listen for messages from the popup window
+      const handleMessage = async (event) => {
+        // Verify origin for security
+        if (event.origin !== window.location.origin) return;
+        
+        if (event.data?.type === 'social_auth_success') {
+          window.removeEventListener('message', handleMessage);
+          
+          const { access_token, refresh_token, user } = event.data.payload;
+          
+          localStorage.setItem("access_token", access_token);
+          localStorage.setItem("refresh_token", refresh_token);
+          localStorage.setItem("user", JSON.stringify(user));
+          
+          setState({
+            accessToken: access_token,
+            refreshToken: refresh_token,
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+          });
+          
+          showSuccessMessage(`${provider.charAt(0).toUpperCase() + provider.slice(1)} login successful!`);
+          return { success: true, data: { access_token, refresh_token, user } };
+        }
+      };
+      
+      window.addEventListener('message', handleMessage);
+      
+      // For demo purposes, simulate a successful login after a delay
+      setTimeout(() => {
+        const mockUser = {
+          id: `${provider}_user_123`,
+          name: `${provider.charAt(0).toUpperCase() + provider.slice(1)} User`,
+          email: `user@${provider}.com`,
+          isApproved: true,
+          role: 'user',
+        };
+        
+        const mockTokens = {
+          access_token: `mock_${provider}_access_token_${Date.now()}`,
+          refresh_token: `mock_${provider}_refresh_token_${Date.now()}`,
+        };
+        
+        localStorage.setItem("access_token", mockTokens.access_token);
+        localStorage.setItem("refresh_token", mockTokens.refresh_token);
+        localStorage.setItem("user", JSON.stringify(mockUser));
+        
+        setState({
+          accessToken: mockTokens.access_token,
+          refreshToken: mockTokens.refresh_token,
+          user: mockUser,
+          isAuthenticated: true,
+          isLoading: false,
+          error: null,
+        });
+        
+        if (authWindow) authWindow.close();
+        
+        showSuccessMessage(`${provider.charAt(0).toUpperCase() + provider.slice(1)} login successful!`);
+      }, 1500);
+      
+      return { success: true };
+    } catch (error) {
+      setState({
+        isLoading: false,
+        error: error.message || `${provider} login failed`,
         isAuthenticated: false,
       });
-      return { success: false, error: error.message };
+      return { success: false, error };
     }
   };
 
@@ -316,6 +402,7 @@ const useAuthStore = (() => {
     subscribe,
     login,
     signup,
+    socialLogin, // Add this
     logout,
     initializeAuth,
     fetchUsers,
