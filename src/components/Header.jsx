@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Menu, X, User, MessageCircle, Shield, LogOut } from "lucide-react";
+import { Menu, X, MessageCircle, Shield, LogOut } from "lucide-react";
 import { useAuthStore } from "@/lib/auth-store";
 import Link from "next/link";
 
@@ -32,33 +32,27 @@ const Header = () => {
             <Image
               src="/logo.svg"
               alt="BREATHE AI"
-              width={32}
-              height={32}
-              className="h-8 w-auto"
+              width={60}
+              height={60}
+              className=""
             />
             <span className="ml-2 text-xl font-bold text-green-600">
               BREATHE AI
             </span>
-          </Link>
+          </Link> 
 
-          {/* Desktop navigation */}
-          <div className="hidden md:flex items-center space-x-4">
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-            >
-              Dashboard
-            </button>
+          {/* Desktop navigation */} 
+          <div className="hidden md:flex items-center space-x-4">          
             <button
               onClick={() => router.push("/chat")}
-              className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+              className="cursor-pointer px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
             >
               Chat
             </button>
             {user?.userType === "admin" && (
               <button
                 onClick={() => router.push("/admin/users")}
-                className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                className="cursor-pointer px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
               >
                 Users
               </button>
@@ -68,12 +62,9 @@ const Header = () => {
                 onClick={() => router.push("/profile")}
                 className="flex items-center space-x-2 cursor-pointer"
               >
-                <div className="h-8 w-8 rounded-full bg-green-600 flex items-center justify-center text-white font-medium">
+                <div className="h-10 w-10 rounded-full bg-green-600 flex items-center justify-center text-white font-medium">
                   {getInitials(user?.name || user?.username)}
                 </div>
-                <span className="text-sm font-medium text-gray-700">
-                  {user?.name || user?.username}
-                </span>
               </div>
             </div>
             <button
@@ -108,29 +99,16 @@ const Header = () => {
               onClick={() => router.push("/profile")}
               className="flex items-center space-x-2 px-3 py-2 cursor-pointer"
             >
-              <div className="h-8 w-8 rounded-full bg-green-600 flex items-center justify-center text-white font-medium">
+              <div className="h-10 w-10 rounded-full bg-green-600 flex items-center justify-center text-white font-medium">
                 {getInitials(user?.name || user?.username)}
               </div>
-              <span className="text-sm font-medium text-gray-700">
-                {user?.name || user?.username}
-              </span>
             </div>
-            <button
-              onClick={() => {
-                router.push("/dashboard");
-                setIsMenuOpen(false);
-              }}
-              className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 w-full text-left"
-            >
-              <User className="h-5 w-5" />
-              <span>Dashboard</span>
-            </button>
             <button
               onClick={() => {
                 router.push("/chat");
                 setIsMenuOpen(false);
               }}
-              className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 w-full text-left"
+              className="cursor-pointer flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 w-full text-left"
             >
               <MessageCircle className="h-5 w-5" />
               <span>Chat</span>
@@ -141,7 +119,7 @@ const Header = () => {
                   router.push("/admin/users");
                   setIsMenuOpen(false);
                 }}
-                className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 w-full text-left"
+                className="cursor-pointer flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 w-full text-left"
               >
                 <Shield className="h-5 w-5" />
                 <span>Users</span>

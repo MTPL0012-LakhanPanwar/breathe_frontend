@@ -103,17 +103,14 @@ export const apiService = {
   },
 
   // User endpoints
-  async getUserById(userId, token) {
-    return this.makeRequest(`/users/${userId}`, { method: "GET" }, token);
+  async getUserProfile(token) {
+    return this.makeRequest(`/users/profile`, { method: "GET" }, token);
   },
 
   async updateProfile(profileData, token) {
     return this.makeRequest(
-      "/users/profile",
-      {
-        method: "PUT",
-        body: profileData,
-      },
+      `/users/profile`,
+      { method: "PUT", body: profileData },
       token
     );
   },

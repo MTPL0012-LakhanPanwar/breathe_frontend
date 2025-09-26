@@ -14,7 +14,7 @@ const Button = ({
 }) => {
   // Base styles
   const baseStyles =
-    "inline-flex items-center justify-center text-sm rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2";
+    "cursor-pointer inline-flex items-center justify-center text-sm rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2";
 
   // Variant styles
   const variantStyles = {

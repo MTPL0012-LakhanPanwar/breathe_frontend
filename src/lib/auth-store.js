@@ -34,7 +34,7 @@ export const useAuthStore = create(
     chatMessages: [],
 
     // --- UI State ---
-    activeTab: "dashboard",
+    activeTab: "chat",
 
     // --------------------------
     // --- Helpers & Actions ---
@@ -65,6 +65,7 @@ export const useAuthStore = create(
       }
     },
 
+    // --- Auth actions ---
     login: async (credentials) => {
       set({ isLoading: true, error: null });
       try {
@@ -86,8 +87,9 @@ export const useAuthStore = create(
         get().setSuccessMessage("Login successful!");
         return { success: true, data };
       } catch (error) {
-        set({ isLoading: false, error: error.message || "Login failed" });
-        return { success: false, error };
+        const errorMsg = error.message || "Login failed";
+        set({ isLoading: false, error: errorMsg });
+        return { success: false, error: errorMsg };
       }
     },
 
@@ -102,103 +104,52 @@ export const useAuthStore = create(
         get().setSuccessMessage("Account created successfully!");
         return { success: true, data };
       } catch (error) {
-        set({ isLoading: false, error: error.message || "Signup failed" });
-        return { success: false, error };
+        const errorMsg = error.message || "Signup failed";
+        set({ isLoading: false, error: errorMsg });
+        return { success: false, error: errorMsg };
       }
     },
 
     socialLogin: async ({ provider }) => {
       set({ isLoading: true, error: null });
       try {
-        const authWindow = window.open(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/${provider}`,
-          "_blank",
-          "width=600,height=600"
-        );
-
-        const handleMessage = async (event) => {
-          if (event.origin !== window.location.origin) return;
-
-          if (event.data?.type === "social_auth_success") {
-            window.removeEventListener("message", handleMessage);
-
-            const { access_token, refresh_token, user } = event.data.payload;
-
-            localStorage.setItem("access_token", access_token);
-            localStorage.setItem("refresh_token", refresh_token);
-            localStorage.setItem("user", JSON.stringify(user));
-
-            set({
-              accessToken: access_token,
-              refreshToken: refresh_token,
-              user,
-              isAuthenticated: true,
-              isLoading: false,
-              error: null,
-            });
-
-            get().setSuccessMessage(
-              `${
-                provider.charAt(0).toUpperCase() + provider.slice(1)
-              } login successful!`
-            );
-
-            return {
-              success: true,
-              data: { access_token, refresh_token, user },
-            };
-          }
+        // demo flow (same as your original)
+        const mockUser = {
+          id: `${provider}_user_123`,
+          name: `${provider.charAt(0).toUpperCase() + provider.slice(1)} User`,
+          email: `user@${provider}.com`,
+          isApproved: true,
+          role: "user",
         };
 
-        window.addEventListener("message", handleMessage);
+        const mockTokens = {
+          access_token: `mock_${provider}_access_token_${Date.now()}`,
+          refresh_token: `mock_${provider}_refresh_token_${Date.now()}`,
+        };
 
-        // Demo simulation
-        setTimeout(() => {
-          const mockUser = {
-            id: `${provider}_user_123`,
-            name: `${
-              provider.charAt(0).toUpperCase() + provider.slice(1)
-            } User`,
-            email: `user@${provider}.com`,
-            isApproved: true,
-            role: "user",
-          };
+        localStorage.setItem("access_token", mockTokens.access_token);
+        localStorage.setItem("refresh_token", mockTokens.refresh_token);
+        localStorage.setItem("user", JSON.stringify(mockUser));
 
-          const mockTokens = {
-            access_token: `mock_${provider}_access_token_${Date.now()}`,
-            refresh_token: `mock_${provider}_refresh_token_${Date.now()}`,
-          };
+        set({
+          accessToken: mockTokens.access_token,
+          refreshToken: mockTokens.refresh_token,
+          user: mockUser,
+          isAuthenticated: true,
+          isLoading: false,
+          error: null,
+        });
 
-          localStorage.setItem("access_token", mockTokens.access_token);
-          localStorage.setItem("refresh_token", mockTokens.refresh_token);
-          localStorage.setItem("user", JSON.stringify(mockUser));
-
-          set({
-            accessToken: mockTokens.access_token,
-            refreshToken: mockTokens.refresh_token,
-            user: mockUser,
-            isAuthenticated: true,
-            isLoading: false,
-            error: null,
-          });
-
-          if (authWindow) authWindow.close();
-
-          get().setSuccessMessage(
-            `${
-              provider.charAt(0).toUpperCase() + provider.slice(1)
-            } login successful!`
-          );
-        }, 1500);
-
+        get().setSuccessMessage(
+          `${
+            provider.charAt(0).toUpperCase() + provider.slice(1)
+          } login successful!`
+        );
         return { success: true };
       } catch (error) {
-        set({
-          isLoading: false,
-          error: error.message || `${provider} login failed`,
-          isAuthenticated: false,
-        });
-        return { success: false, error };
+        const errorMsg = error.message || `${provider} login failed`;
+        set({ isLoading: false, error: errorMsg, isAuthenticated: false });
+        return { success: false, error: errorMsg };
       }
     },
 
@@ -233,11 +184,9 @@ export const useAuthStore = create(
         set({ users: data, isLoadingUsers: false, usersError: null });
         return { success: true, data };
       } catch (error) {
-        set({
-          isLoadingUsers: false,
-          usersError: error.message || "Failed to fetch users",
-        });
-        return { success: false, error: error.message };
+        const errorMsg = error.message || "Failed to fetch users";
+        set({ isLoadingUsers: false, usersError: errorMsg });
+        return { success: false, error: errorMsg };
       }
     },
 
@@ -264,34 +213,31 @@ export const useAuthStore = create(
         );
         return { success: true, data };
       } catch (error) {
-        set({
-          isLoading: false,
-          error: error.message || "Failed to update user approval",
-        });
-        return { success: false, error: error.message };
+        const errorMsg = error.message || "Failed to update user approval";
+        set({ isLoading: false, error: errorMsg });
+        return { success: false, error: errorMsg };
       }
     },
 
     // --- User actions ---
-    fetchUserProfile: async (userId) => {
+    fetchUserProfile: async () => {
       const { accessToken } = get();
       if (!accessToken) return { success: false, error: "No access token" };
 
       set({ isLoadingProfile: true, profileError: null });
       try {
-        const data = await apiService.getUserById(userId, accessToken);
+        const data = await apiService.getUserProfile(accessToken);
         set({
           currentProfile: data,
+          user: data, // Update the stored user as well
           isLoadingProfile: false,
           profileError: null,
         });
         return { success: true, data };
       } catch (error) {
-        set({
-          isLoadingProfile: false,
-          profileError: error.message || "Failed to fetch profile",
-        });
-        return { success: false, error: error.message };
+        const errorMsg = error.message || "Failed to fetch profile";
+        set({ isLoadingProfile: false, profileError: errorMsg });
+        return { success: false, error: errorMsg };
       }
     },
 
@@ -304,20 +250,17 @@ export const useAuthStore = create(
         const data = await apiService.updateProfile(profileData, accessToken);
         set({
           currentProfile: data,
-          user: data,
+          user: data, // Update local user
           isLoadingProfile: false,
           profileError: null,
         });
-
         localStorage.setItem("user", JSON.stringify(data));
         get().setSuccessMessage("Profile updated successfully!");
         return { success: true, data };
       } catch (error) {
-        set({
-          isLoadingProfile: false,
-          profileError: error.message || "Failed to update profile",
-        });
-        return { success: false, error: error.message };
+        const errorMsg = error.message || "Failed to update profile";
+        set({ isLoadingProfile: false, profileError: errorMsg });
+        return { success: false, error: errorMsg };
       }
     },
 
@@ -352,16 +295,16 @@ export const useAuthStore = create(
 
         return { success: true, data };
       } catch (error) {
-        set({
-          isLoadingChat: false,
-          chatError: error.message || "Failed to send message",
-        });
-        return { success: false, error: error.message };
+        const errorMsg = error.message || "Failed to send message";
+        set({ isLoadingChat: false, chatError: errorMsg });
+        return { success: false, error: errorMsg };
       }
     },
 
     // --- UI ---
     setActiveTab: (tab) => set({ activeTab: tab }),
+    clearError: () => set({ error: null }),
+    clearSuccessMessage: () => set({ successMessage: null }),
   }))
 );
 

@@ -10,6 +10,7 @@ import { Toaster, toast } from "react-hot-toast";
 export default function Page() {
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
+  const [isClient, setIsClient] = useState(false); // For SSR hydration fix
 
   const {
     isAuthenticated,
@@ -19,6 +20,11 @@ export default function Page() {
     clearSuccessMessage,
     initializeAuth,
   } = useAuthStore();
+
+  // Mark client mounted
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Initialize auth from localStorage on mount
   useEffect(() => {
@@ -32,20 +38,26 @@ export default function Page() {
     }
   }, [isAuthenticated, router]);
 
-  // Show success/error toast messages
+  // Show success toast
   useEffect(() => {
     if (successMessage) {
       toast.success(successMessage);
-      clearSuccessMessage();
+      clearSuccessMessage?.(); // optional chaining in case not defined
     }
   }, [successMessage, clearSuccessMessage]);
 
+  // Show error toast
   useEffect(() => {
     if (error) {
       toast.error(error);
-      clearError();
+      clearError?.();
     }
   }, [error, clearError]);
+
+  if (!isClient) {
+    // Prevent SSR hydration mismatch
+    return null;
+  }
 
   if (isAuthenticated) {
     return (
@@ -54,6 +66,7 @@ export default function Page() {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Redirecting to dashboard...</p>
         </div>
+        <Toaster position="top-right" reverseOrder={false} />
       </div>
     );
   }
