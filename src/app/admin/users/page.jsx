@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import useAuthStore from "@/lib/auth-store";
+import { useAuthStore } from "@/lib/auth-store";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
 import Toast from "@/components/Toast";
@@ -37,7 +37,7 @@ export default function UsersPage() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push("/auth");
+      router.push("/");
     } else if (user?.userType !== "admin") {
       router.push("/dashboard");
     } else {

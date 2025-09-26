@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Menu, X, User, MessageCircle, Shield, LogOut } from "lucide-react";
-import useAuthStore from "@/lib/auth-store";
+import { useAuthStore } from "@/lib/auth-store";
+import Link from "next/link";
 
 const Header = () => {
   const router = useRouter();
@@ -11,21 +12,23 @@ const Header = () => {
 
   const handleLogout = () => {
     logout();
-    router.push("/auth");
+    router.push("/");
   };
 
   const getInitials = (name) => {
     if (!name) return "U";
     const parts = name.split(" ");
     if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    return (
+      parts[0].charAt(0) + parts[parts.length - 1].charAt(0)
+    ).toUpperCase();
   };
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/40 border-b border-gray-200 shadow-sm glass-morphism">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          <div className="flex items-center">
+          <Link href="/dashboard" className="flex items-center">
             <Image
               src="/logo.svg"
               alt="BREATHE AI"
@@ -33,8 +36,10 @@ const Header = () => {
               height={32}
               className="h-8 w-auto"
             />
-            <span className="ml-2 text-xl font-bold text-green-600">BREATHE AI</span>
-          </div>
+            <span className="ml-2 text-xl font-bold text-green-600">
+              BREATHE AI
+            </span>
+          </Link>
 
           {/* Desktop navigation */}
           <div className="hidden md:flex items-center space-x-4">
@@ -130,7 +135,7 @@ const Header = () => {
               <MessageCircle className="h-5 w-5" />
               <span>Chat</span>
             </button>
-            {user?.userType === "admin" && (
+            {user?.userType == "admin" && (
               <button
                 onClick={() => {
                   router.push("/admin/users");
@@ -144,7 +149,7 @@ const Header = () => {
             )}
             <button
               onClick={handleLogout}
-              className="flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 w-full text-left"
+              className="cursor-pointer flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 w-full text-left"
             >
               <LogOut className="h-5 w-5" />
               <span>Logout</span>

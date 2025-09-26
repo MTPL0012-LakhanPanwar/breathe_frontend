@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import useAuthStore from "@/lib/auth-store";
+import { useAuthStore } from "@/lib/auth-store";
 import Header from "@/components/Header";
 import InputField from "@/components/InputField";
 import Button from "@/components/Button";
@@ -10,7 +10,15 @@ import { User, Mail, Phone, MapPin, Save } from "lucide-react";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, isAuthenticated, updateProfile, isLoadingProfile, profileError, successMessage, clearSuccessMessage } = useAuthStore();
+  const {
+    user,
+    isAuthenticated,
+    updateProfile,
+    isLoadingProfile,
+    profileError,
+    successMessage,
+    clearSuccessMessage,
+  } = useAuthStore();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -22,7 +30,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push("/auth");
+      router.push("/");
     } else if (user) {
       setFormData({
         name: user.name || "",
@@ -78,7 +86,9 @@ export default function ProfilePage() {
     if (!name) return "U";
     const parts = name.split(" ");
     if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    return (
+      parts[0].charAt(0) + parts[parts.length - 1].charAt(0)
+    ).toUpperCase();
   };
 
   if (!isAuthenticated || !user) {
@@ -94,7 +104,11 @@ export default function ProfilePage() {
       <Header />
 
       {showToast && successMessage && (
-        <Toast message={successMessage} type="success" onClose={() => setShowToast(false)} />
+        <Toast
+          message={successMessage}
+          type="success"
+          onClose={() => setShowToast(false)}
+        />
       )}
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -105,11 +119,21 @@ export default function ProfilePage() {
                 {getInitials(formData.name || user.username)}
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">{formData.name || user.username}</h1>
-                <p className="text-sm text-gray-500">{user.userType === 'admin' ? 'Administrator' : 'User'}</p>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  {formData.name || user.username}
+                </h1>
+                <p className="text-sm text-gray-500">
+                  {user.userType === "admin" ? "Administrator" : "User"}
+                </p>
                 <div className="flex items-center mt-1">
-                  <div className={`h-2 w-2 rounded-full ${user.isApproved ? 'bg-green-500' : 'bg-yellow-500'} mr-2`}></div>
-                  <span className="text-xs text-gray-500">{user.isApproved ? 'Approved' : 'Pending Approval'}</span>
+                  <div
+                    className={`h-2 w-2 rounded-full ${
+                      user.isApproved ? "bg-green-500" : "bg-yellow-500"
+                    } mr-2`}
+                  ></div>
+                  <span className="text-xs text-gray-500">
+                    {user.isApproved ? "Approved" : "Pending Approval"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -159,11 +183,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="flex justify-end">
-              <Button
-                type="submit"
-                isLoading={isLoadingProfile}
-                icon={Save}
-              >
+              <Button type="submit" isLoading={isLoadingProfile} icon={Save}>
                 Save Changes
               </Button>
             </div>
@@ -179,4 +199,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-  

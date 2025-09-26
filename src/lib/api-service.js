@@ -1,5 +1,5 @@
 // API Service with proper error handling and token management
-const apiService = {
+export const apiService = {
   baseURL: "http://127.0.0.1:8000",
 
   // Helper method to get auth headers
@@ -73,7 +73,7 @@ const apiService = {
       body: userData,
     });
   },
-  
+
   // Social login endpoint
   async socialLogin(provider, token) {
     return this.makeRequest("/social-login", {
@@ -129,7 +129,7 @@ const apiService = {
       token
     );
   },
-  
+
   // Chat history
   async getChatHistory(token) {
     return this.makeRequest("/chat/history", { method: "GET" }, token);

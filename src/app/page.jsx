@@ -1,14 +1,32 @@
-export default function AuthPage() {
+"use client";
+
+import { useEffect, useState } from "react";
+import { useAuthStore } from "@/lib/auth-store";
+import { useRouter } from "next/navigation";
+import LoginForm from "./login/page";
+import SignupForm from "./signup/page";
+import Image from "next/image";
+import Toast from "@/components/Toast"; // make sure you have a Toast component
+
+export default function Page() {
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
+
   const {
     isAuthenticated,
     successMessage,
     error,
     clearError,
     clearSuccessMessage,
+    initializeAuth,
   } = useAuthStore();
 
+  // Initialize auth from localStorage on mount
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
+
+  // Redirect if authenticated
   useEffect(() => {
     if (isAuthenticated) {
       router.push("/dashboard");
