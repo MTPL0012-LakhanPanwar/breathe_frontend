@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/auth-store";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
-import Toast from "@/components/Toast";
+import { Toaster, toast } from "react-hot-toast";
 import {
   CheckCircle,
   XCircle,
@@ -23,7 +23,7 @@ export default function UsersPage() {
     updateUserApproval,
     isLoadingUsers,
     usersError,
-    users = [],
+    users,
     successMessage,
     clearSuccessMessage,
   } = useAuthStore();
@@ -48,23 +48,17 @@ export default function UsersPage() {
 
   useEffect(() => {
     if (successMessage) {
-      setShowToast(true);
-      const timer = setTimeout(() => {
-        clearSuccessMessage();
-        setShowToast(false);
-      }, 3000);
-      return () => clearTimeout(timer);
+      toast.success(successMessage);
+      clearSuccessMessage();
     }
   }, [successMessage, clearSuccessMessage]);
 
   const handleApprovalToggle = async (userId, currentStatus) => {
     try {
-      // Attempt to toggle approval. The store's updateUserApproval implementation
-      // may accept different params; we attempt a common shape: (id, payload)
       await updateUserApproval(userId, { isApproved: !currentStatus });
-      // refresh users after action (store may do it itself, but safe to call)
       fetchUsers();
     } catch (err) {
+      toast.error("Failed to update approval");
       console.error("Failed to update approval", err);
     }
   };
@@ -80,7 +74,9 @@ export default function UsersPage() {
         status: "declined",
       });
       fetchUsers();
+      toast.success("User declined successfully");
     } catch (err) {
+      toast.error("Failed to decline user");
       console.error("Failed to decline user", err);
     }
   };
@@ -168,16 +164,9 @@ export default function UsersPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-
-      {showToast && successMessage && (
-        <Toast
-          message={successMessage}
-          type="success"
-          onClose={() => setShowToast(false)}
-        />
-      )}
-
       <main className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-8">
+        {/* Toaster for all toast messages */}
+        <Toaster position="top-right" reverseOrder={false} />
         <div className="bg-white/80 rounded-lg shadow-sm overflow-hidden backdrop-blur-sm glass-morphism">
           <div className="p-4 sm:p-6 border-b border-gray-200">
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900">

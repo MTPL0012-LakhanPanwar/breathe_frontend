@@ -53,65 +53,79 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="max-w-md w-full space-y-8 p-6 bg-white rounded-xl shadow-lg">
-      <div className="text-center">
-        <Image
-          src="/logo.svg"
-          alt="BREATHE AI"
-          width={48}
-          height={48}
-          className="mx-auto h-12 w-auto"
-        />
-        <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-          Sign in to your account
-        </h2>
-        <p className="mt-2 text-sm text-gray-600">
-          Or{" "}
-          <Link
-            href="/signup"
-            className="font-medium text-green-600 hover:text-green-500"
-          >
-            create a new account
-          </Link>
-        </p>
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+      {/* Header with BREATHE AI branding */}
+      <div className="w-full max-w-sm mb-8">
+        <div className="bg-green-500 rounded-2xl p-8 text-center text-white mb-8">
+          <div className="mx-auto mb-4 flex items-center justify-center">
+            <Image
+              src="/logo.svg"
+              alt="BREATHE AI"
+              width={80}
+              height={80}
+              className="rounded-full"
+            />
+          </div>
+          <h1 className="text-xl font-bold tracking-wide">BREATHE AI</h1>
+          <p className="text-green-100 text-sm mt-2">
+            Welcome back to your wellness journey
+          </p>
+        </div>
       </div>
 
-      <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-        <div className="space-y-4">
-          <InputField
-            icon={Mail}
-            type="text"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            error={validationErrors.username}
-            placeholder="Enter your username"
-          />
-
-          <InputField
-            icon={Lock}
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            error={validationErrors.password}
-            placeholder="Enter your password"
-            showPasswordToggle={true}
-            onTogglePassword={() => setShowPassword(!showPassword)}
-            showPassword={showPassword}
-          />
+      {/* Login Form */}
+      <div className="w-full max-w-sm">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Sign in to your account
+          </h2>
+          <p className="text-gray-600 text-sm">
+            or{" "}
+            <Link
+              href="signup"
+              className="text-green-500 font-medium hover:text-green-600"
+            >
+              create a new account
+            </Link>
+          </p>
         </div>
 
-        <Button type="submit" isLoading={isLoading} fullWidth>
-          Sign in
-        </Button>
+        <form
+          className="bg-white rounded-2xl shadow-lg p-6"
+          onSubmit={handleSubmit}
+        >
+          <div className="space-y-4">
+            <InputField
+              icon={Mail}
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              error={validationErrors.username}
+              placeholder="Enter your username"
+            />
 
-        {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-600">{error}</p>
+            <InputField
+              icon={Lock}
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              error={validationErrors.password}
+              placeholder="Enter your password"
+              showPasswordToggle={true}
+              onTogglePassword={() => setShowPassword(!showPassword)}
+              showPassword={showPassword}
+            />
+
+            <div className="flex items-center justify-center">
+              <Button type="submit" isLoading={isLoading} className="w-35">
+                Sign In
+              </Button>
+            </div>
           </div>
-        )}
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

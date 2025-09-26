@@ -1,32 +1,29 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/auth-store";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
 import { MessageCircle } from "lucide-react";
-import Toast from "@/components/Toast";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function DashboardPage() {
   const router = useRouter();
   const { user, isAuthenticated, successMessage, clearSuccessMessage } =
     useAuthStore();
-  const [showToast, setShowToast] = useState(false);
 
+  // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
       router.push("/");
     }
   }, [isAuthenticated, router]);
 
+  // Show success toast
   useEffect(() => {
     if (successMessage) {
-      setShowToast(true);
-      const timer = setTimeout(() => {
-        clearSuccessMessage();
-        setShowToast(false);
-      }, 3000);
-      return () => clearTimeout(timer);
+      toast.success(successMessage);
+      clearSuccessMessage();
     }
   }, [successMessage, clearSuccessMessage]);
 
@@ -40,15 +37,10 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      {/* Toast provider */}
+      <Toaster position="top-right" reverseOrder={false} />
 
-      {showToast && successMessage && (
-        <Toast
-          message={successMessage}
-          type="success"
-          onClose={() => setShowToast(false)}
-        />
-      )}
+      <Header />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow-sm p-6">
@@ -57,6 +49,7 @@ export default function DashboardPage() {
           </h1>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* User Status */}
             <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-lg shadow-sm">
               <h2 className="text-lg font-semibold text-green-800 mb-2">
                 Your Status
@@ -78,6 +71,7 @@ export default function DashboardPage() {
               </p>
             </div>
 
+            {/* Chat */}
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg shadow-sm">
               <h2 className="text-lg font-semibold text-blue-800 mb-2">
                 Chat with BREATHE AI
@@ -100,6 +94,7 @@ export default function DashboardPage() {
               )}
             </div>
 
+            {/* Account Type */}
             <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-lg shadow-sm">
               <h2 className="text-lg font-semibold text-purple-800 mb-2">
                 Account Type

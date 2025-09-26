@@ -25,9 +25,7 @@ const InputField = ({
           value={value}
           onChange={onChange}
           className={`
-              w-full pl-10 pr-${
-                showPasswordToggle ? "10" : "4"
-              } py-3  text-black
+              w-full pl-10 pr-${showPasswordToggle ? "10" : "4"} py-3 text-black
               border-2 rounded-lg transition-all duration-300 ease-in-out
               focus:outline-none focus:ring-2 focus:ring-green-500/20
               ${

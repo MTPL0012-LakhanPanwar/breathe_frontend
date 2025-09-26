@@ -5,7 +5,7 @@ import { useAuthStore } from "@/lib/auth-store";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
 import { Send, Trash2, MessageSquare } from "lucide-react";
-import Toast from "@/components/Toast";
+import { Toaster, toast } from "react-hot-toast";
 
 export default function ChatPage() {
   const router = useRouter();
@@ -14,9 +14,6 @@ export default function ChatPage() {
   const [currentChat, setCurrentChat] = useState([]);
   const [chatHistory, setChatHistory] = useState([]);
   const [activeChatId, setActiveChatId] = useState(null);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-  const [toastType, setToastType] = useState("success");
   const messagesEndRef = useRef(null);
 
   // Load chat history from localStorage
@@ -72,11 +69,9 @@ export default function ChatPage() {
     if (!input.trim()) return;
 
     if (!user.isApproved) {
-      setToastMessage(
+      toast.error(
         "Your account is pending approval. You cannot chat at this time."
       );
-      setToastType("error");
-      setShowToast(true);
       return;
     }
 
@@ -143,6 +138,7 @@ export default function ChatPage() {
           isError: true,
         },
       ]);
+      toast.error("Failed to send message. Please try again.");
     }
   };
 
@@ -178,6 +174,7 @@ export default function ChatPage() {
     if (activeChatId === chatId) {
       startNewChat();
     }
+    toast.success("Chat deleted successfully.");
   };
 
   if (!isAuthenticated || !user) {
@@ -191,14 +188,8 @@ export default function ChatPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header />
-
-      {showToast && (
-        <Toast
-          message={toastMessage}
-          type={toastType}
-          onClose={() => setShowToast(false)}
-        />
-      )}
+      {/* Hot Toast container */}
+      <Toaster position="top-right" reverseOrder={false} />
 
       <div className="flex flex-1 overflow-hidden">
         {/* Chat history sidebar */}

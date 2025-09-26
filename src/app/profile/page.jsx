@@ -5,8 +5,8 @@ import { useAuthStore } from "@/lib/auth-store";
 import Header from "@/components/Header";
 import InputField from "@/components/InputField";
 import Button from "@/components/Button";
-import Toast from "@/components/Toast";
 import { User, Mail, Phone, MapPin, Save } from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -19,13 +19,13 @@ export default function ProfilePage() {
     successMessage,
     clearSuccessMessage,
   } = useAuthStore();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     location: "",
   });
-  const [showToast, setShowToast] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
 
   useEffect(() => {
@@ -41,16 +41,20 @@ export default function ProfilePage() {
     }
   }, [isAuthenticated, router, user]);
 
+  // Show success toast
   useEffect(() => {
     if (successMessage) {
-      setShowToast(true);
-      const timer = setTimeout(() => {
-        clearSuccessMessage();
-        setShowToast(false);
-      }, 3000);
-      return () => clearTimeout(timer);
+      toast.success(successMessage);
+      clearSuccessMessage();
     }
   }, [successMessage, clearSuccessMessage]);
+
+  // Show error toast
+  useEffect(() => {
+    if (profileError) {
+      toast.error(profileError);
+    }
+  }, [profileError]);
 
   const validateForm = () => {
     const errors = {};
@@ -69,7 +73,6 @@ export default function ProfilePage() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear validation error when user types
     if (validationErrors[name]) {
       setValidationErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -101,15 +104,10 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      {/* Toast container */}
+      <Toaster position="top-right" reverseOrder={false} />
 
-      {showToast && successMessage && (
-        <Toast
-          message={successMessage}
-          type="success"
-          onClose={() => setShowToast(false)}
-        />
-      )}
+      <Header />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow-sm p-6">
@@ -187,12 +185,6 @@ export default function ProfilePage() {
                 Save Changes
               </Button>
             </div>
-
-            {profileError && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-600">{profileError}</p>
-              </div>
-            )}
           </form>
         </div>
       </main>

@@ -5,8 +5,7 @@ import { useAuthStore } from "@/lib/auth-store";
 import { useRouter } from "next/navigation";
 import LoginForm from "./login/page";
 import SignupForm from "./signup/page";
-import Image from "next/image";
-import Toast from "@/components/Toast"; // make sure you have a Toast component
+import { Toaster, toast } from "react-hot-toast";
 
 export default function Page() {
   const router = useRouter();
@@ -33,6 +32,21 @@ export default function Page() {
     }
   }, [isAuthenticated, router]);
 
+  // Show success/error toast messages
+  useEffect(() => {
+    if (successMessage) {
+      toast.success(successMessage);
+      clearSuccessMessage();
+    }
+  }, [successMessage, clearSuccessMessage]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      clearError();
+    }
+  }, [error, clearError]);
+
   if (isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-yellow-50 flex items-center justify-center p-4">
@@ -46,45 +60,16 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-yellow-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl overflow-hidden w-full max-w-md">
-        <div className="bg-gradient-to-r from-green-500 to-green-600 p-6">
-          <div className="text-center">
-            <div className="bg-white/20 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-              <Image
-                src="/logo.svg"
-                alt="BREATHE AI"
-                width={32}
-                height={32}
-                className="rounded-full"
-              />
-            </div>
-            <h1 className="text-white text-xl font-semibold">BREATHE AI</h1>
-            <p className="text-white/80 text-sm mt-1">
-              {isLogin
-                ? "Welcome back to your wellness journey"
-                : "Start your journey to inner peace"}
-            </p>
-          </div>
-        </div>
-
-        <div className="p-8">
+      <div className="shadow-xl overflow-hidden w-full max-w-md">
+        <div className="p-0 md:p-8">
           {isLogin ? (
             <LoginForm onSwitchToSignup={() => setIsLogin(false)} />
           ) : (
             <SignupForm onSwitchToLogin={() => setIsLogin(true)} />
           )}
         </div>
-
-        {successMessage && (
-          <Toast
-            message={successMessage}
-            type="success"
-            onClose={clearSuccessMessage}
-          />
-        )}
-
-        {error && <Toast message={error} type="error" onClose={clearError} />}
       </div>
+      <Toaster position="top-right" reverseOrder={false} />
     </div>
   );
 }
