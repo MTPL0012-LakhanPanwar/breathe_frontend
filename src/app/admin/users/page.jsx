@@ -32,6 +32,9 @@ export default function UsersPage() {
   const [activeFilter, setActiveFilter] = useState("all"); // all, active, inactive
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [loadingUserId, setLoadingUserId] = useState(null);
+  const [loadingAction, setLoadingAction] = useState(null);
+
   const usersPerPage = 10;
 
   useEffect(() => {
@@ -51,14 +54,20 @@ export default function UsersPage() {
     }
   }, [successMessage, clearSuccessMessage]);
 
-  const handleStatusChange = async (userId, newStatus) => {
+  const handleStatusChange = async (userId, status) => {
+    setLoadingUserId(userId);
+    setLoadingAction(status);
+
     try {
-      await updateUserApproval(userId, newStatus);
+      await updateUserApproval(userId, status);
       fetchUsers();
-      toast.success(`User ${newStatus} successfully`);
+      toast.success(`User ${status} successfully`);
     } catch (err) {
       toast.error("Failed to update status");
       console.error(err);
+    } finally {
+      setLoadingUserId(null);
+      setLoadingAction(null);
     }
   };
 
@@ -332,7 +341,7 @@ export default function UsersPage() {
                                   }
                                   disabled={
                                     u.isApproved === "approved" ||
-                                    isLoadingUsers
+                                    loadingUserId === uid
                                   }
                                   variant={
                                     u.isApproved === "approved"
@@ -341,6 +350,10 @@ export default function UsersPage() {
                                   }
                                   size="sm"
                                   icon={CheckCircle}
+                                  isLoading={
+                                    loadingUserId === uid &&
+                                    loadingAction === "approved"
+                                  }
                                   className={
                                     u.isApproved === "approved"
                                       ? "bg-green-100 text-green-700 border-green-300"
@@ -361,13 +374,17 @@ export default function UsersPage() {
                                   }
                                   disabled={
                                     u.isApproved === "declined" ||
-                                    isLoadingUsers
+                                    loadingUserId === uid
                                   }
                                   variant={
                                     u.isApproved === "declined" ? "outline" : ""
                                   }
                                   size="sm"
                                   icon={XCircle}
+                                  isLoading={
+                                    loadingUserId === uid &&
+                                    loadingAction === "declined"
+                                  }
                                   className={
                                     u.isApproved === "declined"
                                       ? "bg-red-100 text-red-700 border-red-300"

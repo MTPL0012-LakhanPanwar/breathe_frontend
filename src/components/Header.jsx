@@ -32,8 +32,8 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/40 border-b border-gray-200 shadow-sm glass-morphism">
-       <Toaster position="top-right" reverseOrder={false} />
-      <div className="mx-auto px-4 sm:px-6 lg:px-8">
+      <Toaster position="top-right" reverseOrder={false} />
+      <div className="mx-auto px-2 sm:px-3 lg:px-8">
         <div className="flex justify-between h-16">
           <Link href="/chat" className="flex items-center">
             <Image
@@ -110,7 +110,7 @@ const Header = () => {
                   router.push("/admin/users");
                   setIsMenuOpen(false);
                 }}
-                className="cursor-pointer flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 w-full text-left"
+                className="cursor-pointer border-b border-b-green-600 flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 w-full text-left"
               >
                 <Shield className="h-5 w-5" />
                 <span>Users</span>
@@ -118,7 +118,7 @@ const Header = () => {
             )}
             <button
               onClick={handleLogout}
-              className="cursor-pointer flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 w-full text-left"
+              className="cursor-pointer border-b border-b-green-600 flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 w-full text-left"
             >
               <LogOut className="h-5 w-5" />
               <span>Logout</span>
