@@ -75,10 +75,10 @@ export const apiService = {
   },
 
   // Social login endpoint
-  async socialLogin(provider, token) {
-    return this.makeRequest("/social-login", {
+  async socialLogin(provider, id_token) {
+    return this.makeRequest("/auth/social-login", {
       method: "POST",
-      body: { provider, token },
+      body: { provider, id_token },
     });
   },
 

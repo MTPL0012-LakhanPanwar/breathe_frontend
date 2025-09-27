@@ -108,41 +108,25 @@ export const useAuthStore = create(
       }
     },
 
-    socialLogin: async ({ provider }) => {
+    socialLogin: async ({ provider, id_token }) => {
       set({ isLoading: true, error: null });
       try {
-        // demo flow (same as your original)
-        const mockUser = {
-          id: `${provider}_user_123`,
-          name: `${provider.charAt(0).toUpperCase() + provider.slice(1)} User`,
-          email: `user@${provider}.com`,
-          isApproved: true,
-          role: "user",
-        };
+        const data = await apiService.socialLogin(provider, id_token); // uses fixed service
 
-        const mockTokens = {
-          access_token: `mock_${provider}_access_token_${Date.now()}`,
-          refresh_token: `mock_${provider}_refresh_token_${Date.now()}`,
-        };
-
-        localStorage.setItem("access_token", mockTokens.access_token);
-        localStorage.setItem("refresh_token", mockTokens.refresh_token);
-        localStorage.setItem("user", JSON.stringify(mockUser));
+        localStorage.setItem("access_token", data.access_token);
+        localStorage.setItem("refresh_token", data.refresh_token);
+        localStorage.setItem("user", JSON.stringify(data.user));
 
         set({
-          accessToken: mockTokens.access_token,
-          refreshToken: mockTokens.refresh_token,
-          user: mockUser,
+          accessToken: data.access_token,
+          refreshToken: data.refresh_token,
+          user: data.user,
           isAuthenticated: true,
           isLoading: false,
           error: null,
         });
 
-        get().setSuccessMessage(
-          `${
-            provider.charAt(0).toUpperCase() + provider.slice(1)
-          } login successful!`
-        );
+        get().setSuccessMessage(`${provider} login successful!`);
         return { success: true };
       } catch (error) {
         const errorMsg = error.message || `${provider} login failed`;
