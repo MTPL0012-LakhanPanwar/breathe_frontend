@@ -28,7 +28,6 @@ export default function UsersPage() {
     clearSuccessMessage,
   } = useAuthStore();
 
-  const [showToast, setShowToast] = useState(false);
   const [filter, setFilter] = useState("all"); // all, approved, pending, declined
   const [activeFilter, setActiveFilter] = useState("all"); // all, active, inactive
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,11 +38,10 @@ export default function UsersPage() {
     if (!isAuthenticated) {
       router.push("/");
     } else if (user?.userType !== "admin") {
-      router.push("/dashboard");
+      router.push("/chat");
     } else {
       fetchUsers();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, router, user]);
 
   useEffect(() => {
@@ -53,50 +51,29 @@ export default function UsersPage() {
     }
   }, [successMessage, clearSuccessMessage]);
 
-  const handleApprovalToggle = async (userId, currentStatus) => {
+  const handleStatusChange = async (userId, newStatus) => {
     try {
-      await updateUserApproval(userId, { isApproved: !currentStatus });
+      await updateUserApproval(userId, newStatus);
       fetchUsers();
+      toast.success(`User ${newStatus} successfully`);
     } catch (err) {
-      toast.error("Failed to update approval");
-      console.error("Failed to update approval", err);
+      toast.error("Failed to update status");
+      console.error(err);
     }
   };
 
-  const handleDecline = async (userId) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to decline this user's request?"
-    );
-    if (!confirmed) return;
-    try {
-      await updateUserApproval(userId, {
-        isApproved: false,
-        status: "declined",
-      });
-      fetchUsers();
-      toast.success("User declined successfully");
-    } catch (err) {
-      toast.error("Failed to decline user");
-      console.error("Failed to decline user", err);
-    }
-  };
-
-  // Derive filtered users with useMemo for performance
   const filteredUsers = useMemo(() => {
     return (users || []).filter((u) => {
       const matchesStatusFilter =
         filter === "all" ||
-        (filter === "approved" && u.isApproved) ||
-        (filter === "pending" && !u.isApproved && u.status !== "declined") ||
-        (filter === "declined" && u.status === "declined");
+        (filter === "approved" && u.isApproved === "approved") ||
+        (filter === "pending" && u.isApproved === "pending") ||
+        (filter === "declined" && u.isApproved === "declined");
 
-      const isActive =
-        u.lastActive &&
-        new Date() - new Date(u.lastActive) < 30 * 24 * 60 * 60 * 1000;
       const matchesActivityFilter =
         activeFilter === "all" ||
-        (activeFilter === "active" && isActive) ||
-        (activeFilter === "inactive" && !isActive);
+        (activeFilter === "active" && u.isActive) ||
+        (activeFilter === "inactive" && !u.isActive);
 
       const term = (searchTerm || "").toLowerCase();
       const matchesSearch =
@@ -152,7 +129,7 @@ export default function UsersPage() {
             <p className="text-gray-600 mb-6">
               You do not have permission to access this page.
             </p>
-            <Button onClick={() => router.push("/dashboard")}>
+            <Button onClick={() => router.push("/chat")}>
               Return to Dashboard
             </Button>
           </div>
@@ -165,7 +142,6 @@ export default function UsersPage() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <main className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-8">
-        {/* Toaster for all toast messages */}
         <Toaster position="top-right" reverseOrder={false} />
         <div className="bg-white/80 rounded-lg shadow-sm overflow-hidden backdrop-blur-sm glass-morphism">
           <div className="p-4 sm:p-6 border-b border-gray-200">
@@ -189,7 +165,7 @@ export default function UsersPage() {
                     placeholder="Search users..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full sm:w-auto pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    className="w-full sm:w-auto pl-10 text-black pr-4 py-2 border border-gray-300 outline-none rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500"
                   />
                 </div>
                 <div className="flex space-x-2">
@@ -200,7 +176,7 @@ export default function UsersPage() {
                     <select
                       value={filter}
                       onChange={(e) => setFilter(e.target.value)}
-                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      className="pl-10 pr-4 py-2 border text-black border-gray-300 outline-none rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500"
                     >
                       <option value="all">All Status</option>
                       <option value="approved">Approved</option>
@@ -212,7 +188,7 @@ export default function UsersPage() {
                     <select
                       value={activeFilter}
                       onChange={(e) => setActiveFilter(e.target.value)}
-                      className="pl-4 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      className="pl-4 pr-4 py-2 border text-black border-gray-300 outline-none rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500"
                     >
                       <option value="all">All Activity</option>
                       <option value="active">Active Users</option>
@@ -255,46 +231,22 @@ export default function UsersPage() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         User
                       </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Email
                       </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Type
                       </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Status
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Request Status
                       </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Request Details
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Active State
                       </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Last Active
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
@@ -316,16 +268,13 @@ export default function UsersPage() {
                                     "U"}
                                 </div>
                                 <div className="ml-3 sm:ml-4">
-                                  <div className="text-sm font-medium text-gray-900">
+                                  <div className="text-sm font-medium text-gray-500">
                                     {u.name || u.username}
-                                  </div>
-                                  <div className="text-xs sm:text-sm text-gray-500">
-                                    @{u.username}
                                   </div>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">
+                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-500 table-cell">
                               {u.email || "No email provided"}
                             </td>
                             <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
@@ -340,81 +289,97 @@ export default function UsersPage() {
                               </span>
                             </td>
                             <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                              <span
+                                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                  u.isApproved === "approved"
+                                    ? "bg-green-100 text-green-800"
+                                    : u.isApproved === "declined"
+                                    ? "bg-red-100 text-red-800"
+                                    : "bg-yellow-100 text-yellow-800"
+                                }`}
+                              >
+                                {u.isApproved === "approved"
+                                  ? "Approved"
+                                  : u.isApproved === "declined"
+                                  ? "Declined"
+                                  : "Pending"}
+                              </span>
+                            </td>
+                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-500 table-cell">
                               <div className="flex items-center">
                                 <div
                                   className={`h-2.5 w-2.5 rounded-full mr-2 ${
-                                    u.isApproved
-                                      ? "bg-green-500"
-                                      : "bg-yellow-500"
+                                    u.isActive ? "bg-green-500" : "bg-red-500"
                                   }`}
                                 ></div>
                                 <span
                                   className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                    u.isApproved
+                                    u.isActive
                                       ? "bg-green-100 text-green-800"
-                                      : "bg-yellow-100 text-yellow-800"
+                                      : "bg-red-100 text-red-800"
                                   }`}
                                 >
-                                  {u.isApproved
-                                    ? "Approved"
-                                    : u.status === "declined"
-                                    ? "Declined"
-                                    : "Pending"}
+                                  {u.isActive ? "Active" : "Inactive"}
                                 </span>
                               </div>
                             </td>
-                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
-                              <div className="max-w-xs">
-                                <p className="truncate">
-                                  {u.requestDetails ||
-                                    "No request details provided"}
-                                </p>
-                                {u.requestDetails && (
-                                  <button
-                                    className="text-green-600 hover:text-green-800 text-xs mt-1 font-medium"
-                                    onClick={() =>
-                                      window.alert(u.requestDetails)
-                                    }
-                                  >
-                                    View full details
-                                  </button>
-                                )}
-                              </div>
-                            </td>
-                            <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-500 hidden lg:table-cell">
-                              {u.lastActive
-                                ? new Date(u.lastActive).toLocaleDateString()
-                                : "Never"}
-                            </td>
                             <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium">
-                              <div className="flex space-x-2">
+                              <div className="flex space-x-3 items-center justify-center">
+                                {/* Approve Button */}
                                 <Button
                                   onClick={() =>
-                                    handleApprovalToggle(uid, !!u.isApproved)
+                                    handleStatusChange(uid, "approved")
                                   }
-                                  disabled={isLoadingUsers}
-                                  variant={u.isApproved ? "outline" : "primary"}
+                                  disabled={
+                                    u.isApproved === "approved" ||
+                                    isLoadingUsers
+                                  }
+                                  variant={
+                                    u.isApproved === "approved"
+                                      ? "outline"
+                                      : "primary"
+                                  }
                                   size="sm"
-                                  icon={u.isApproved ? XCircle : CheckCircle}
+                                  icon={CheckCircle}
+                                  className={
+                                    u.isApproved === "approved"
+                                      ? "bg-green-100 text-green-700 border-green-300"
+                                      : ""
+                                  }
                                 >
                                   <span className="hidden sm:inline">
-                                    {u.isApproved ? "Revoke" : "Approve"}
+                                    {u.isApproved === "approved"
+                                      ? "Approved"
+                                      : "Approve"}
                                   </span>
                                 </Button>
 
-                                {!u.isApproved && u.status !== "declined" && (
-                                  <Button
-                                    onClick={() => handleDecline(uid)}
-                                    disabled={isLoadingUsers}
-                                    variant="outline"
-                                    size="sm"
-                                    icon={XCircle}
-                                  >
-                                    <span className="hidden sm:inline">
-                                      Decline
-                                    </span>
-                                  </Button>
-                                )}
+                                {/* Decline Button */}
+                                <Button
+                                  onClick={() =>
+                                    handleStatusChange(uid, "declined")
+                                  }
+                                  disabled={
+                                    u.isApproved === "declined" ||
+                                    isLoadingUsers
+                                  }
+                                  variant={
+                                    u.isApproved === "declined" ? "outline" : ""
+                                  }
+                                  size="sm"
+                                  icon={XCircle}
+                                  className={
+                                    u.isApproved === "declined"
+                                      ? "bg-red-100 text-red-700 border-red-300"
+                                      : "bg-red-500 text-white hover:bg-red-400"
+                                  }
+                                >
+                                  <span className="hidden sm:inline">
+                                    {u.isApproved === "declined"
+                                      ? "Declined"
+                                      : "Decline"}
+                                  </span>
+                                </Button>
                               </div>
                             </td>
                           </tr>
@@ -488,7 +453,7 @@ export default function UsersPage() {
                       <select
                         value={currentPage}
                         onChange={(e) => paginate(Number(e.target.value))}
-                        className="mr-4 pl-2 pr-8 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                        className="mr-4 pl-2 pr-8 py-1 border border-gray-300 text-gray-700 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
                       >
                         {Array.from(
                           { length: totalPages },
@@ -513,16 +478,12 @@ export default function UsersPage() {
                           { length: Math.min(5, totalPages) },
                           (_, i) => {
                             let pageNumber;
-                            if (totalPages <= 5) {
-                              pageNumber = i + 1;
-                            } else if (currentPage <= 3) {
-                              pageNumber = i + 1;
-                            } else if (currentPage >= totalPages - 2) {
+                            if (totalPages <= 5) pageNumber = i + 1;
+                            else if (currentPage <= 3) pageNumber = i + 1;
+                            else if (currentPage >= totalPages - 2)
                               pageNumber = totalPages - 4 + i;
-                            } else {
-                              pageNumber = currentPage - 2 + i;
-                            }
-                            // ensure pageNumber is within bounds
+                            else pageNumber = currentPage - 2 + i;
+
                             if (pageNumber < 1 || pageNumber > totalPages)
                               return null;
                             return (

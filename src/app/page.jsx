@@ -34,7 +34,7 @@ export default function Page() {
   // Redirect if authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push("/dashboard");
+      router.push("/chat");
     }
   }, [isAuthenticated, router]);
 

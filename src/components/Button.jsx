@@ -18,18 +18,19 @@ const Button = ({
 
   // Variant styles
   const variantStyles = {
-    primary: "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500",
+    primary:
+      "bg-green-600 border-1 border-green-600text-white hover:bg-green-700 focus:ring-green-500",
     secondary:
       "bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500",
     danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
     outline:
-      "bg-transparent border-2 border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-500",
+      "bg-transparent border-1 border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-500",
     ghost: "bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-gray-500",
   };
 
   // Size styles
   const sizeStyles = {
-    sm: "text-xs px-2 py-1",
+    sm: "text-xs px-2 py-2",
     md: "text-sm px-4 py-2",
     lg: "text-base px-6 py-3",
   };
@@ -55,7 +56,7 @@ const Button = ({
         </>
       ) : (
         <>
-          {Icon && <Icon className="h-4 w-4 mr-2" />}
+          {Icon && <Icon className="h-4 w-4 mr-1" />}
           {children}
         </>
       )}

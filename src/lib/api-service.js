@@ -95,7 +95,7 @@ export const apiService = {
     return this.makeRequest(
       `/admin/users/${userId}/approval`,
       {
-        method: "PUT",
+        method: "POST",
         body: { isApproved },
       },
       token

@@ -10,7 +10,7 @@ export const SocialLoginButtons = () => {
     try {
       const result = await socialLogin({ provider });
       if (result.success) {
-        router.push("/dashboard");
+        router.push("/chat");
       }
     } catch (error) {
       console.error("Social login error:", error);

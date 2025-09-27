@@ -1,18 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Menu, X, MessageCircle, Shield, LogOut } from "lucide-react";
+import { Menu, X, Shield, LogOut } from "lucide-react";
 import { useAuthStore } from "@/lib/auth-store";
 import Link from "next/link";
+import { Toaster, toast } from "react-hot-toast";
 
 const Header = () => {
   const router = useRouter();
-  const { user, logout } = useAuthStore();
+  const { user, fetchUserProfile, logout } = useAuthStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
 
   const handleLogout = () => {
     logout();
     router.push("/");
+    toast.success("Logout successful!");
   };
 
   const getInitials = (name) => {
@@ -26,9 +32,10 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/40 border-b border-gray-200 shadow-sm glass-morphism">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+       <Toaster position="top-right" reverseOrder={false} />
+      <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          <Link href="/dashboard" className="flex items-center">
+          <Link href="/chat" className="flex items-center">
             <Image
               src="/logo.svg"
               alt="BREATHE AI"
@@ -39,16 +46,10 @@ const Header = () => {
             <span className="ml-2 text-xl font-bold text-green-600">
               BREATHE AI
             </span>
-          </Link> 
+          </Link>
 
-          {/* Desktop navigation */} 
-          <div className="hidden md:flex items-center space-x-4">          
-            <button
-              onClick={() => router.push("/chat")}
-              className="cursor-pointer px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-            >
-              Chat
-            </button>
+          {/* Desktop navigation */}
+          <div className="hidden md:flex items-center space-x-4">
             {user?.userType === "admin" && (
               <button
                 onClick={() => router.push("/admin/users")}
@@ -103,16 +104,6 @@ const Header = () => {
                 {getInitials(user?.name || user?.username)}
               </div>
             </div>
-            <button
-              onClick={() => {
-                router.push("/chat");
-                setIsMenuOpen(false);
-              }}
-              className="cursor-pointer flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 w-full text-left"
-            >
-              <MessageCircle className="h-5 w-5" />
-              <span>Chat</span>
-            </button>
             {user?.userType == "admin" && (
               <button
                 onClick={() => {

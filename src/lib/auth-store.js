@@ -55,7 +55,6 @@ export const useAuthStore = create(
           set({
             accessToken: token,
             refreshToken: refresh,
-            // user: JSON.parse(user),
             user: user,
             isAuthenticated: true,
           });
@@ -101,7 +100,6 @@ export const useAuthStore = create(
         localStorage.setItem("user", JSON.stringify(data));
 
         set({ user: data, isLoading: false, error: null });
-        get().setSuccessMessage("Account created successfully!");
         return { success: true, data };
       } catch (error) {
         const errorMsg = error.message || "Signup failed";
@@ -167,10 +165,8 @@ export const useAuthStore = create(
         users: [],
         currentProfile: null,
         chatMessages: [],
-        activeTab: "dashboard",
+        activeTab: "chat",
       });
-
-      get().setSuccessMessage("Logged out successfully!");
     },
 
     // --- Admin actions ---
@@ -208,9 +204,6 @@ export const useAuthStore = create(
 
         set({ users: updatedUsers, isLoading: false, error: null });
 
-        get().setSuccessMessage(
-          `User ${isApproved ? "approved" : "unapproved"} successfully!`
-        );
         return { success: true, data };
       } catch (error) {
         const errorMsg = error.message || "Failed to update user approval";
@@ -307,26 +300,3 @@ export const useAuthStore = create(
     clearSuccessMessage: () => set({ successMessage: null }),
   }))
 );
-
-// Custom hook to use the store
-// export const useAuth = () => {
-//   const [state, setState] = useState(useAuthStore.getState());
-
-//   useEffect(() => {
-//     const unsubscribe = useAuthStore.subscribe(setState);
-//     return unsubscribe;
-//   }, []);
-
-//   return {
-//     ...state,
-//     login: useAuthStore.login,
-//     signup: useAuthStore.signup,
-//     logout: useAuthStore.logout,
-//     fetchUsers: useAuthStore.fetchUsers,
-//     updateUserApproval: useAuthStore.updateUserApproval,
-//     fetchUserProfile: useAuthStore.fetchUserProfile,
-//     updateProfile: useAuthStore.updateProfile,
-//     sendChatMessage: useAuthStore.sendChatMessage,
-//     setActiveTab: useAuthStore.setActiveTab,
-//   };
-// };
