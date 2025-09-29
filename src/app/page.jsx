@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import LoginForm from "./login/page";
 import SignupForm from "./signup/page";
 import { Toaster, toast } from "react-hot-toast";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function Page() {
   const router = useRouter();
@@ -72,17 +73,19 @@ export default function Page() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-yellow-50 flex items-center justify-center p-4">
-      <div className="shadow-xl overflow-hidden w-full max-w-md">
-        <div className="p-0 md:p-8">
-          {isLogin ? (
-            <LoginForm onSwitchToSignup={() => setIsLogin(false)} />
-          ) : (
-            <SignupForm onSwitchToLogin={() => setIsLogin(true)} />
-          )}
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-yellow-50 flex items-center justify-center p-4">
+        <div className="shadow-xl overflow-hidden w-full max-w-md">
+          <div className="p-0 md:p-8">
+            {isLogin ? (
+              <LoginForm onSwitchToSignup={() => setIsLogin(false)} />
+            ) : (
+              <SignupForm onSwitchToLogin={() => setIsLogin(true)} />
+            )}
+          </div>
         </div>
+        <Toaster position="top-right" reverseOrder={false} />
       </div>
-      <Toaster position="top-right" reverseOrder={false} />
-    </div>
+    </ProtectedRoute>
   );
 }
