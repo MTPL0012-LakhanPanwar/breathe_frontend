@@ -1,6 +1,6 @@
 // API Service with proper error handling and token management
 
- const APIsURL= "https://chatbot.breathedxb.com/chat";
+ const APIsURL= "https://chatbot.breathedxb.com";
 // const APIsURL = "http://127.0.0.1:8000";
 
 export const apiService = {
