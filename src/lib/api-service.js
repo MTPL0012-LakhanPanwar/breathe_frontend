@@ -1,7 +1,11 @@
 // API Service with proper error handling and token management
+
+ const APIsURL= "https://chatbot.breathedxb.com/chat";
+// const APIsURL = "http://127.0.0.1:8000";
+
 export const apiService = {
-  baseURL: "https://chatbot.breathedxb.com/chat",
-  // baseURL: "http://127.0.0.1:8000",
+  baseURL: APIsURL,
+
   // Helper method to get auth headers
   getAuthHeaders: (token) => ({
     Authorization: `Bearer ${token}`,
@@ -75,11 +79,27 @@ export const apiService = {
   },
 
   // Social login endpoint
-  async socialLogin(provider, id_token) {
-    return this.makeRequest("/auth/social-login", {
-      method: "POST",
-      body: { provider, id_token },
-    });
+  socialLogin: async (payload) => {
+    try {
+      const response = await fetch(`${APIsURL}/auth/social-login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || "Social login failed");
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Social login API error:", error);
+      throw error;
+    }
   },
 
   // Admin endpoints

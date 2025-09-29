@@ -108,10 +108,19 @@ export const useAuthStore = create(
       }
     },
 
-    socialLogin: async ({ provider, id_token }) => {
+    socialLogin: async ({ provider, id_token, access_token }) => {
       set({ isLoading: true, error: null });
       try {
-        const data = await apiService.socialLogin(provider, id_token); // uses fixed service
+        const payload = { provider };
+
+        // Add the appropriate token based on provider
+        if (provider === "google" && id_token) {
+          payload.id_token = id_token;
+        } else if (provider === "facebook" && access_token) {
+          payload.access_token = access_token;
+        }
+
+        const data = await apiService.socialLogin(payload);
 
         localStorage.setItem("access_token", data.access_token);
         localStorage.setItem("refresh_token", data.refresh_token);

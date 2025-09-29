@@ -19,7 +19,7 @@ const Button = ({
   // Variant styles
   const variantStyles = {
     primary:
-      "bg-green-600 border-1 border-green-600text-white hover:bg-green-700 focus:ring-green-500",
+      "bg-green-600 border-1 border-green-600 text-white hover:bg-green-700 focus:ring-green-500",
     secondary:
       "bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500",
     danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",

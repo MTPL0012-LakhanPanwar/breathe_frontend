@@ -118,11 +118,18 @@ export default function LoginForm() {
               showPassword={showPassword}
             />
 
+            {error && (
+              <div className="text-red-500 text-sm text-center">{error}</div>
+            )}
+
             <div className="flex items-center justify-center">
               <Button type="submit" isLoading={isLoading} className="w-35">
                 Sign In
               </Button>
             </div>
+
+            {/* Social Login */}
+            <SocialLoginButtons />
           </div>
         </form>
       </div>
