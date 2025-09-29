@@ -1,4 +1,3 @@
-import { Google, Facebook } from "lucide-react";
 import { useAuthStore } from "@/lib/auth-store";
 import { useRouter } from "next/navigation";
 
@@ -21,20 +20,12 @@ export const SocialLoginButtons = () => {
     <div className="mt-4 grid grid-cols-3 gap-3">
       <button
         type="button"
-        onClick={() => handleSocialLogin("twitter")}
+        onClick={() => handleSocialLogin("google")}
         disabled={isLoading}
-        className="w-full inline-flex justify-center py-2 px-4 border border-gray-300/60 rounded-md shadow-sm bg-white/80 backdrop-blur-sm glass-morphism text-sm font-medium text-gray-600 hover:bg-gray-50/90 transition-all duration-200 hover:scale-105"
+        className="w-full inline-flex justify-center py-2 px-4 border border-gray-300/60 rounded-md shadow-sm bg-white/80 backdrop-blur-sm glass-morphism text-sm font-medium text-black hover:bg-gray-50/90 transition-all duration-200 hover:scale-105"
       >
-        <Google className="h-5 w-5" />
-      </button>
-      <button
-        type="button"
-        onClick={() => handleSocialLogin("facebook")}
-        disabled={isLoading}
-        className="w-full inline-flex justify-center py-2 px-4 border border-gray-300/60 rounded-md shadow-sm bg-white/80 backdrop-blur-sm glass-morphism text-sm font-medium text-gray-600 hover:bg-gray-50/90 transition-all duration-200 hover:scale-105"
-      >
-        <Facebook className="h-5 w-5" />
-      </button>
+        Google
+      </button>    
     </div>
   );
 };
