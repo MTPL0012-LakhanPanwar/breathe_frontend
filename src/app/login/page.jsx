@@ -127,12 +127,11 @@ export default function LoginForm() {
                 Sign In
               </Button>
             </div>
-
-            {/* Social Login */}
-            <SocialLoginButtons />
           </div>
         </form>
       </div>
+      {/* Social Login */}
+      <SocialLoginButtons />
     </div>
   );
 }

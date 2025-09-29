@@ -250,6 +250,53 @@ export const useAuthStore = create(
       }
     },
 
+    changePassword: async (payload) => {
+      const { accessToken } = get();
+      if (!accessToken) return { success: false, error: "No access token" };
+    
+      set({ isLoading: true, error: null });
+      try {
+        const data = await apiService.changePassword(payload, accessToken);
+        set({ isLoading: false });
+        get().setSuccessMessage(data.message || "Password changed successfully!");
+        return { success: true, data };
+      } catch (error) {
+        const errorMsg = error.message || "Failed to change password";
+        set({ isLoading: false, error: errorMsg });
+        get().setSuccessMessage(errorMsg);
+        return { success: false, error: errorMsg };
+      }
+    },
+    
+    deleteAccount: async () => {
+      const { accessToken } = get();
+      if (!accessToken) return { success: false, error: "No access token" };
+    
+      set({ isLoading: true, error: null });
+      try {
+        const data = await apiService.deleteAccount(accessToken);
+    
+        // Clear local storage
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("user");
+    
+        set({
+          user: null,
+          accessToken: null,
+          refreshToken: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
+    
+        return { success: true, data };
+      } catch (error) {
+        const errorMsg = error.message || "Failed to delete account";
+        set({ isLoading: false, error: errorMsg });
+        return { success: false, error: errorMsg };
+      }
+    },
+
     // --- Chat ---
     sendChatMessage: async (input) => {
       const { accessToken, chatMessages } = get();

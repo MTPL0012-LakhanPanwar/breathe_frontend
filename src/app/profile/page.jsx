@@ -6,7 +6,7 @@ import { useAuthStore } from "@/lib/auth-store";
 import Header from "@/components/Header";
 import InputField from "@/components/InputField";
 import Button from "@/components/Button";
-import { User, Mail, Calendar, Save } from "lucide-react";
+import { User, Mail, Calendar, Save, Lock } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function ProfilePage() {
@@ -20,6 +20,8 @@ export default function ProfilePage() {
     profileError,
     successMessage,
     clearSuccessMessage,
+    changePassword,
+    deleteAccount,
   } = useAuthStore();
 
   const [formData, setFormData] = useState({
@@ -29,6 +31,7 @@ export default function ProfilePage() {
     dob: "",
   });
   const [validationErrors, setValidationErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
 
   // Fetch user profile once
   useEffect(() => {
@@ -129,11 +132,11 @@ export default function ProfilePage() {
           {/* User Info */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
             <div className="flex items-center space-x-4 mb-4 md:mb-0">
-              <div className="h-16 w-16 rounded-full bg-green-600 flex items-center justify-center text-white text-2xl font-bold">
+              <div className="h-10 w-16 md:h-16 rounded-full bg-green-600 flex items-center justify-center text-white text-2xl font-bold">
                 {getInitials(formData.username || user.username)}
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-lg md:text-2xl font-bold text-gray-900">
                   {formData.username || user.username}
                 </h1>
                 <p className="text-sm text-gray-500">
@@ -259,6 +262,92 @@ export default function ProfilePage() {
               </Button>
             </div>
           </form>
+
+          <div className="mt-10 flex gap-6 justify-center flex-col md:flex-row">
+            {/* Change Password Section */}
+            <div className="md:w-[50%] bg-white rounded-lg">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                Change Password
+              </h2>
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const current_password =
+                    e.target.current_password.value.trim();
+                  const new_password = e.target.new_password.value.trim();
+
+                  if (!current_password || !new_password) {
+                    toast.error("Both fields are required");
+                    return;
+                  }
+
+                  const res = await changePassword({
+                    current_password,
+                    new_password,
+                  });
+                  if (res.success) {
+                    e.target.reset();
+                    router.push("/");
+                  }
+                }}
+                className="space-y-4"
+              >
+                <InputField
+                  icon={Lock}
+                  showPasswordToggle={true}
+                  type="password"
+                  name="current_password"
+                  placeholder="Current Password"
+                  onTogglePassword={() => setShowPassword(!showPassword)}
+                  showPassword={showPassword}
+                />
+                <InputField
+                  icon={Lock}
+                  showPasswordToggle={true}
+                  type="password"
+                  name="new_password"
+                  placeholder="New Password"
+                  onTogglePassword={() => setShowPassword(!showPassword)}
+                  showPassword={showPassword}
+                />
+                <div className="flex justify-end">
+                  <Button type="submit" isLoading={isLoadingProfile}>
+                    Update Password
+                  </Button>
+                </div>
+              </form>
+            </div>
+
+            {/* Delete Account Section */}
+            <div className="md:w-[50%] bg-white rounded-lg">
+              <h2 className="text-xl font-semibold text-red-600 mb-4">
+                Delete Account
+              </h2>
+              <p className="text-gray-600 mb-4">
+                Deleting your account is permanent and cannot be undone. All
+                your data will be removed.
+              </p>
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  onClick={async () => {
+                    if (
+                      confirm("Are you sure you want to delete your account?")
+                    ) {
+                      const res = await deleteAccount();
+                      if (res.success) {
+                        toast.success("Account deleted successfully!");
+                        router.push("/"); // Redirect to home/login
+                      }
+                    }
+                  }}
+                  className="bg-red-600 border-1 border-red-600 hover:bg-red-700 text-white"
+                >
+                  Delete Account
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
     </div>

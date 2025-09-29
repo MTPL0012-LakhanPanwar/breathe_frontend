@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/auth-store";
 import { Mail, Lock, User, Calendar, Users } from "lucide-react";
 import SocialLoginButtons from "@/components/SocialLoginButtons";
@@ -10,7 +9,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 export default function SignupForm() {
-  const router = useRouter();
+
   const { signup, isLoading, error } = useAuthStore();
   const [formData, setFormData] = useState({
     username: "",
@@ -228,18 +227,9 @@ export default function SignupForm() {
           </>
         )}
       </div>
-      {/* <div className="mt-6">
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">Or sign up with</span>
-          </div>
-        </div>
 
-        <SocialLoginButtons />
-      </div> */}
+      {/* Social Login */}
+      <SocialLoginButtons />
     </div>
   );
 }

@@ -135,6 +135,24 @@ export const apiService = {
     );
   },
 
+  // Change password
+  async changePassword(data, token) {
+    return this.makeRequest(
+      "/auth/change-password",
+      { method: "POST", body: data },
+      token
+    );
+  },
+
+  // Delete account
+  async deleteAccount(token) {
+    return this.makeRequest(
+      "/auth/delete-account",
+      { method: "DELETE" },
+      token
+    );
+  },
+
   // Chat endpoint
   async sendMessage(input, token) {
     return this.makeRequest(

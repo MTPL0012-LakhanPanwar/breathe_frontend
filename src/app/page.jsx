@@ -42,7 +42,6 @@ export default function Page() {
   // Show success toast
   useEffect(() => {
     if (successMessage) {
-      toast.success(successMessage);
       clearSuccessMessage?.(); // optional chaining in case not defined
     }
   }, [successMessage, clearSuccessMessage]);
