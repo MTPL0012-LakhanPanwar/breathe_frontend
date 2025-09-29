@@ -1,6 +1,6 @@
 // API Service with proper error handling and token management
 export const apiService = {
-  baseURL: "http://127.0.0.1:8000",
+  baseURL: "http://127.0.0.1:8000" || "https://chatbot.breathedxb.com/chat",
 
   // Helper method to get auth headers
   getAuthHeaders: (token) => ({
