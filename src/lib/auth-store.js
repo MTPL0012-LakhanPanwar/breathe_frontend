@@ -42,7 +42,7 @@ export const useAuthStore = create(
 
     setSuccessMessage: (message) => {
       set({ successMessage: message });
-      setTimeout(() => set({ successMessage: null }), 3000);
+      setTimeout(() => set({ successMessage: null }), 2000);
     },
 
     initializeAuth: () => {

@@ -247,10 +247,20 @@ export default function ChatPage() {
 
   const deleteChat = (chatId, e) => {
     e.stopPropagation();
-    setChatHistory((prev) => prev.filter((chat) => chat.id !== chatId));
-    if (activeChatId === chatId) {
-      startNewChat();
-    }
+    setChatHistory((prev) => {
+      const updatedHistory = prev.filter((chat) => chat.id !== chatId);
+
+      // save updated history in localStorage
+      localStorage.setItem("chatHistory", JSON.stringify(updatedHistory));
+
+      // if the deleted chat was active, reset to a new chat
+      if (activeChatId === chatId) {
+        startNewChat();
+      }
+
+      return updatedHistory;
+    });
+
     toast.success("Chat deleted successfully.");
   };
 

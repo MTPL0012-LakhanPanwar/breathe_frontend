@@ -40,9 +40,11 @@ export default function UsersPage() {
   useEffect(() => {
     if (!isAuthenticated) {
       router.push("/");
-    } else if (user?.userType !== "admin") {
-      router.push("/chat");
-    } else {
+    } 
+    // else if (user?.userType !== "admin") {
+    //   router.push("/chat");
+    // }
+     else {
       fetchUsers();
     }
   }, [isAuthenticated, router, user]);
