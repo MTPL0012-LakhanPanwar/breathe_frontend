@@ -8,12 +8,12 @@ import InputField from "@/components/InputField";
 import Button from "@/components/Button";
 import { User, Mail, Calendar, Save, Lock } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function ProfilePage() {
   const router = useRouter();
   const {
     user,
-    isAuthenticated,
     fetchUserProfile,
     updateProfile,
     isLoadingProfile,
@@ -35,11 +35,6 @@ export default function ProfilePage() {
 
   // Fetch user profile once
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/");
-      return;
-    }
-
     const loadProfile = async () => {
       const res = await fetchUserProfile();
       if (res.success && res.data) {
@@ -53,7 +48,7 @@ export default function ProfilePage() {
     };
 
     loadProfile();
-  }, [isAuthenticated, router, fetchUserProfile]);
+  }, [fetchUserProfile]);
 
   useEffect(() => {
     if (successMessage) {
@@ -114,242 +109,236 @@ export default function ProfilePage() {
       : (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
   };
 
-  if (!isAuthenticated || !user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Toaster position="top-right" reverseOrder={false} />
-      <Header />
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gray-50">
+        <Toaster position="top-right" reverseOrder={false} />
+        <Header />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow-md p-6 sm:p-8">
-          {/* User Info */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-            <div className="flex items-center space-x-4 mb-4 md:mb-0">
-              <div className="h-10 w-16 md:h-16 rounded-full bg-green-600 flex items-center justify-center text-white text-2xl font-bold">
-                {getInitials(formData.username || user.username)}
-              </div>
-              <div>
-                <h1 className="text-lg md:text-2xl font-bold text-gray-900">
-                  {formData.username || user.username}
-                </h1>
-                <p className="text-sm text-gray-500">
-                  {user.userType === "admin" ? "Administrator" : "User"}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Profile Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Username */}
-              <div className="flex flex-col">
-                <label className="text-sm font-medium text-gray-700 mb-1">
-                  Username
-                </label>
-                <InputField
-                  icon={User}
-                  type="text"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  error={validationErrors.username}
-                  placeholder="Enter username"
-                />
-              </div>
-
-              {/* Email */}
-              <div className="flex flex-col">
-                <label className="text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <InputField
-                  icon={Mail}
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  error={validationErrors.email}
-                  placeholder="Enter email"
-                />
-              </div>
-
-              {/* Gender Dropdown */}
-              <div className="relative flex flex-col">
-                <label className="text-sm font-medium text-gray-700 mb-1">
-                  Gender
-                </label>
-
-                <div className="relative w-full">
-                  {/* Gender Icon */}
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <User className="w-5 h-5 text-gray-400" />
-                  </div>
-
-                  {/* Select Dropdown */}
-                  <select
-                    name="gender"
-                    value={formData.gender}
-                    onChange={handleChange}
-                    className={`w-full pl-10 pr-10 text-black py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all duration-200 bg-gray-50 appearance-none ${
-                      validationErrors.gender
-                        ? "border-red-300 focus:ring-red-500"
-                        : "border-gray-200"
-                    }`}
-                  >
-                    <option value="" disabled>
-                      Select your gender
-                    </option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                  </select>
-
-                  {/* Dropdown Arrow */}
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    <svg
-                      className="w-4 h-4 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </div>
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-white rounded-lg shadow-md p-6 sm:p-8">
+            {/* User Info */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+              <div className="flex items-center space-x-4 mb-4 md:mb-0">
+                <div className="h-10 w-16 md:h-16 rounded-full bg-green-600 flex items-center justify-center text-white text-2xl font-bold">
+                  {getInitials(formData.username || user?.username || "U")}
                 </div>
-
-                {/* Validation Error */}
-                {validationErrors.gender && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {validationErrors.gender}
+                <div>
+                  <h1 className="text-lg md:text-2xl font-bold text-gray-900">
+                    {formData.username || user?.username || "Loading..."}
+                  </h1>
+                  <p className="text-sm text-gray-500">
+                    {user?.userType === "admin" ? "Administrator" : "User"}
                   </p>
-                )}
-              </div>
-
-              {/* Date of Birth */}
-              <div className="flex flex-col">
-                <label className="text-sm font-medium text-gray-700 mb-1">
-                  Date of Birth
-                </label>
-                <InputField
-                  icon={Calendar}
-                  type="date"
-                  name="dob"
-                  value={formData.dob}
-                  onChange={handleChange}
-                  error={validationErrors.dob}
-                  placeholder="Select date of birth"
-                  max={new Date().toISOString().split("T")[0]}
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end">
-              <Button type="submit" isLoading={isLoadingProfile} icon={Save}>
-                Save Changes
-              </Button>
-            </div>
-          </form>
-
-          <div className="mt-10 flex gap-6 justify-center flex-col md:flex-row">
-            {/* Change Password Section */}
-            <div className="md:w-[50%] bg-white rounded-lg">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                Change Password
-              </h2>
-              <form
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  const current_password =
-                    e.target.current_password.value.trim();
-                  const new_password = e.target.new_password.value.trim();
-
-                  if (!current_password || !new_password) {
-                    toast.error("Both fields are required");
-                    return;
-                  }
-
-                  const res = await changePassword({
-                    current_password,
-                    new_password,
-                  });
-                  if (res.success) {
-                    e.target.reset();
-                    router.push("/");
-                  }
-                }}
-                className="space-y-4"
-              >
-                <InputField
-                  icon={Lock}
-                  showPasswordToggle={true}
-                  type="password"
-                  name="current_password"
-                  placeholder="Current Password"
-                  onTogglePassword={() => setShowPassword(!showPassword)}
-                  showPassword={showPassword}
-                />
-                <InputField
-                  icon={Lock}
-                  showPasswordToggle={true}
-                  type="password"
-                  name="new_password"
-                  placeholder="New Password"
-                  onTogglePassword={() => setShowPassword(!showPassword)}
-                  showPassword={showPassword}
-                />
-                <div className="flex justify-end">
-                  <Button type="submit" isLoading={isLoadingProfile}>
-                    Update Password
-                  </Button>
                 </div>
-              </form>
+              </div>
             </div>
 
-            {/* Delete Account Section */}
-            <div className="md:w-[50%] bg-white rounded-lg">
-              <h2 className="text-xl font-semibold text-red-600 mb-4">
-                Delete Account
-              </h2>
-              <p className="text-gray-600 mb-4">
-                Deleting your account is permanent and cannot be undone. All
-                your data will be removed.
-              </p>
+            {/* Profile Form */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Username */}
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-700 mb-1">
+                    Username
+                  </label>
+                  <InputField
+                    icon={User}
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    error={validationErrors.username}
+                    placeholder="Enter username"
+                  />
+                </div>
+
+                {/* Email */}
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <InputField
+                    icon={Mail}
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    error={validationErrors.email}
+                    placeholder="Enter email"
+                  />
+                </div>
+
+                {/* Gender Dropdown */}
+                <div className="relative flex flex-col">
+                  <label className="text-sm font-medium text-gray-700 mb-1">
+                    Gender
+                  </label>
+
+                  <div className="relative w-full">
+                    {/* Gender Icon */}
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <User className="w-5 h-5 text-gray-400" />
+                    </div>
+
+                    {/* Select Dropdown */}
+                    <select
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleChange}
+                      className={`w-full pl-10 pr-10 text-black py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all duration-200 bg-gray-50 appearance-none ${
+                        validationErrors.gender
+                          ? "border-red-300 focus:ring-red-500"
+                          : "border-gray-200"
+                      }`}
+                    >
+                      <option value="" disabled>
+                        Select your gender
+                      </option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+
+                    {/* Dropdown Arrow */}
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                      <svg
+                        className="w-4 h-4 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Validation Error */}
+                  {validationErrors.gender && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {validationErrors.gender}
+                    </p>
+                  )}
+                </div>
+
+                {/* Date of Birth */}
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-700 mb-1">
+                    Date of Birth
+                  </label>
+                  <InputField
+                    icon={Calendar}
+                    type="date"
+                    name="dob"
+                    value={formData.dob}
+                    onChange={handleChange}
+                    error={validationErrors.dob}
+                    placeholder="Select date of birth"
+                    max={new Date().toISOString().split("T")[0]}
+                  />
+                </div>
+              </div>
+
               <div className="flex justify-end">
-                <Button
-                  type="button"
-                  onClick={async () => {
-                    if (
-                      confirm("Are you sure you want to delete your account?")
-                    ) {
-                      const res = await deleteAccount();
-                      if (res.success) {
-                        toast.success("Account deleted successfully!");
-                        router.push("/"); // Redirect to home/login
-                      }
-                    }
-                  }}
-                  className="bg-red-600 border-1 border-red-600 hover:bg-red-700 text-white"
-                >
-                  Delete Account
+                <Button type="submit" isLoading={isLoadingProfile} icon={Save}>
+                  Save Changes
                 </Button>
               </div>
+            </form>
+
+            <div className="mt-10 flex gap-6 justify-center flex-col md:flex-row">
+              {/* Change Password Section */}
+              <div className="md:w-[50%] bg-white rounded-lg">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                  Change Password
+                </h2>
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const current_password =
+                      e.target.current_password.value.trim();
+                    const new_password = e.target.new_password.value.trim();
+
+                    if (!current_password || !new_password) {
+                      toast.error("Both fields are required");
+                      return;
+                    }
+
+                    const res = await changePassword({
+                      current_password,
+                      new_password,
+                    });
+                    if (res.success) {
+                      e.target.reset();
+                      router.push("/");
+                    }
+                  }}
+                  className="space-y-4"
+                >
+                  <InputField
+                    icon={Lock}
+                    showPasswordToggle={true}
+                    type="password"
+                    name="current_password"
+                    placeholder="Current Password"
+                    onTogglePassword={() => setShowPassword(!showPassword)}
+                    showPassword={showPassword}
+                  />
+                  <InputField
+                    icon={Lock}
+                    showPasswordToggle={true}
+                    type="password"
+                    name="new_password"
+                    placeholder="New Password"
+                    onTogglePassword={() => setShowPassword(!showPassword)}
+                    showPassword={showPassword}
+                  />
+                  <div className="flex justify-end">
+                    <Button type="submit" isLoading={isLoadingProfile}>
+                      Update Password
+                    </Button>
+                  </div>
+                </form>
+              </div>
+
+              {/* Delete Account Section */}
+              <div className="md:w-[50%] bg-white rounded-lg">
+                <h2 className="text-xl font-semibold text-red-600 mb-4">
+                  Delete Account
+                </h2>
+                <p className="text-gray-600 mb-4">
+                  Deleting your account is permanent and cannot be undone. All
+                  your data will be removed.
+                </p>
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    onClick={async () => {
+                      if (
+                        confirm("Are you sure you want to delete your account?")
+                      ) {
+                        const res = await deleteAccount();
+                        if (res.success) {
+                          toast.success("Account deleted successfully!");
+                          router.push("/");
+                        }
+                      }
+                    }}
+                    className="bg-red-600 border-1 border-red-600 hover:bg-red-700 text-white"
+                  >
+                    Delete Account
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </ProtectedRoute>
   );
 }
