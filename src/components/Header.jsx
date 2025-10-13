@@ -37,7 +37,7 @@ const Header = () => {
         <div className="flex justify-between h-16">
           <Link href="/chat" className="flex items-center">
             <Image
-              src="/logo.svg"
+              src="/logo.png"
               alt="BREATHE AI"
               width={60}
               height={60}

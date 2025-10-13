@@ -59,7 +59,7 @@ export default function LoginForm() {
         <div className="bg-green-500 rounded-2xl p-8 text-center text-white mb-8">
           <div className="mx-auto mb-4 flex items-center justify-center">
             <Image
-              src="/logo.svg"
+              src="/logo.png"
               alt="BREATHE AI"
               width={80}
               height={80}
