@@ -1,4 +1,3 @@
-// lib/chat-store.js
 "use client";
 
 import { create } from "zustand";

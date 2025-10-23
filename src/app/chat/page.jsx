@@ -462,6 +462,7 @@ export default function ChatPage() {
                           {new Date(message.timestamp).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
+                            hour12: true,
                           })}
                         </span>
                         {message.role === "assistant" && !message.isError && (

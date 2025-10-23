@@ -1,4 +1,3 @@
-// lib/auth-store.js
 "use client";
 
 import { create } from "zustand";
