@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useAuthStore } from "@/lib/auth-store";
+import { useAuthStore } from "@/store/auth-store";
 import { Mail, Lock, User, Calendar, Users } from "lucide-react";
 import SocialLoginButtons from "@/components/SocialLoginButtons";
 import InputField from "@/components/InputField";

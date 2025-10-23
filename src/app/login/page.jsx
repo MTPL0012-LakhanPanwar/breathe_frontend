@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/lib/auth-store";
+import { useAuthStore } from "@/store/auth-store";
 import { Mail, Lock } from "lucide-react";
 import SocialLoginButtons from "@/components/SocialLoginButtons";
 import InputField from "@/components/InputField";

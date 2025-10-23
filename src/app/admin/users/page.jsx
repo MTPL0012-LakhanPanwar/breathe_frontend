@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/lib/auth-store";
+import { useAuthStore } from "@/store/auth-store";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
 import { Toaster, toast } from "react-hot-toast";
