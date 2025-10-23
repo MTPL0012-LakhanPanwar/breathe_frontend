@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/auth-store";
 import Header from "@/components/Header";
 import InputField from "@/components/InputField";
 import Button from "@/components/Button";
+import ConfirmationModal from "@/components/ConfirmationModal";
 import { User, Mail, Calendar, Save, Lock } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -32,6 +33,8 @@ export default function ProfilePage() {
   });
   const [validationErrors, setValidationErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   // Fetch user profile once
   useEffect(() => {
@@ -101,6 +104,18 @@ export default function ProfilePage() {
     await updateProfile(formData);
   };
 
+  const handleDeleteAccount = async () => {
+    setIsDeletingAccount(true);
+    const res = await deleteAccount();
+    setIsDeletingAccount(false);
+
+    if (res.success) {
+      toast.success("Account deleted successfully!");
+      setShowDeleteModal(false);
+      router.push("/");
+    }
+  };
+
   const getInitials = (name) => {
     if (!name) return "U";
     const parts = name.split(" ");
@@ -114,6 +129,19 @@ export default function ProfilePage() {
       <div className="min-h-screen bg-gray-50">
         <Toaster position="top-right" reverseOrder={false} />
         <Header />
+
+        {/* Delete Account Modal */}
+        <ConfirmationModal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={handleDeleteAccount}
+          title="Delete Account"
+          message="Are you sure you want to delete your account? This action is permanent and cannot be undone. All your data will be removed."
+          confirmText="Delete"
+          cancelText="Cancel"
+          variant="danger"
+          isLoading={isDeletingAccount}
+        />
 
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-white rounded-lg shadow-md p-6 sm:p-8">
@@ -318,17 +346,7 @@ export default function ProfilePage() {
                 <div className="flex justify-end">
                   <Button
                     type="button"
-                    onClick={async () => {
-                      if (
-                        confirm("Are you sure you want to delete your account?")
-                      ) {
-                        const res = await deleteAccount();
-                        if (res.success) {
-                          toast.success("Account deleted successfully!");
-                          router.push("/");
-                        }
-                      }
-                    }}
+                    onClick={() => setShowDeleteModal(true)}
                     className="bg-red-600 border-1 border-red-600 hover:bg-red-700 text-white"
                   >
                     Delete Account

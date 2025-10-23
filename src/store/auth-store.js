@@ -272,7 +272,7 @@ export const useAuthStore = create(
 
       set({ isLoading: true, error: null });
       try {
-        const data = await apiService.deleteAccount(accessToken);
+        const data = await authService.deleteAccount(accessToken);
 
         // Clear local storage
         localStorage.removeItem("access_token");

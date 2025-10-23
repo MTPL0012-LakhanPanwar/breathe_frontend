@@ -16,6 +16,7 @@ import { useChatStore } from "@/store/chat-store";
 import { Toaster, toast } from "react-hot-toast";
 import Header from "@/components/Header";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import ConfirmationModal from "@/components/ConfirmationModal";
 
 export default function ChatPage() {
   const { user, fetchUserProfile } = useAuthStore();
@@ -40,6 +41,9 @@ export default function ChatPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false); // Default closed on mobile
   const [editingChatId, setEditingChatId] = useState(null);
   const [editingTitle, setEditingTitle] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [chatToDelete, setChatToDelete] = useState(null);
+  const [isDeletingChat, setIsDeletingChat] = useState(false);
   const messagesEndRef = useRef(null);
 
   // Handle responsive sidebar - close on mobile by default
@@ -167,17 +171,23 @@ export default function ChatPage() {
     setEditingTitle("");
   };
 
-  const handleDeleteChat = async (chatId, e) => {
+  const openDeleteModal = (chat, e) => {
     e.stopPropagation();
+    setChatToDelete(chat);
+    setShowDeleteModal(true);
+  };
 
-    if (!confirm("Are you sure you want to delete this chat?")) {
-      return;
-    }
+  const handleConfirmDelete = async () => {
+    if (!chatToDelete) return;
 
-    const result = await deleteChat(chatId, false);
+    setIsDeletingChat(true);
+    const result = await deleteChat(chatToDelete._id, false);
+    setIsDeletingChat(false);
 
     if (result.success) {
       toast.success("Chat deleted successfully");
+      setShowDeleteModal(false);
+      setChatToDelete(null);
     } else {
       toast.error(result.error);
     }
@@ -194,6 +204,22 @@ export default function ChatPage() {
     <ProtectedRoute>
       <div className="h-screen bg-gray-50 flex flex-col">
         <Header />
+
+        {/* Delete Chat Modal */}
+        <ConfirmationModal
+          isOpen={showDeleteModal}
+          onClose={() => {
+            setShowDeleteModal(false);
+            setChatToDelete(null);
+          }}
+          onConfirm={handleConfirmDelete}
+          title="Delete Chat"
+          message={`Are you sure you want to delete "${chatToDelete?.title}"? This action cannot be undone.`}
+          confirmText="Delete"
+          cancelText="Cancel"
+          variant="danger"
+          isLoading={isDeletingChat}
+        />
 
         <div className="flex flex-1 overflow-hidden relative">
           {/* Mobile sidebar overlay */}
@@ -347,7 +373,7 @@ export default function ChatPage() {
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={(e) => handleDeleteChat(chat._id, e)}
+                            onClick={(e) => openDeleteModal(chat, e)}
                             className="p-1 cursor-pointer rounded hover:bg-red-500/20 transition-all duration-200 text-red-400 hover:text-red-300"
                           >
                             <Trash2 className="w-4 h-4" />
