@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/lib/auth-store";
+import { useAuthStore } from "@/store/auth-store";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
+import ConfirmationModal from "@/components/ConfirmationModal";
 import { Toaster, toast } from "react-hot-toast";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import {
@@ -36,6 +37,14 @@ export default function UsersPage() {
   const [loadingUserId, setLoadingUserId] = useState(null);
   const [loadingAction, setLoadingAction] = useState(null);
 
+  // Modal state
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    userId: null,
+    action: null,
+    userName: "",
+  });
+
   const usersPerPage = 10;
 
   useEffect(() => {
@@ -65,6 +74,31 @@ export default function UsersPage() {
     } finally {
       setLoadingUserId(null);
       setLoadingAction(null);
+      setModalConfig({
+        isOpen: false,
+        userId: null,
+        action: null,
+        userName: "",
+      });
+    }
+  };
+
+  const openConfirmationModal = (userId, action, userName) => {
+    setModalConfig({
+      isOpen: true,
+      userId,
+      action,
+      userName,
+    });
+  };
+
+  const closeModal = () => {
+    setModalConfig({ isOpen: false, userId: null, action: null, userName: "" });
+  };
+
+  const handleConfirmAction = () => {
+    if (modalConfig.userId && modalConfig.action) {
+      handleStatusChange(modalConfig.userId, modalConfig.action);
     }
   };
 
@@ -145,6 +179,28 @@ export default function UsersPage() {
         <Header />
         <main className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-8">
           <Toaster position="top-right" reverseOrder={false} />
+
+          {/* Confirmation Modal */}
+          <ConfirmationModal
+            isOpen={modalConfig.isOpen}
+            onClose={closeModal}
+            onConfirm={handleConfirmAction}
+            title={
+              modalConfig.action === "approved"
+                ? "Approve User"
+                : "Decline User"
+            }
+            message={
+              modalConfig.action === "approved"
+                ? `Are you sure you want to approve ${modalConfig.userName}? They will gain access to the system.`
+                : `Are you sure you want to decline ${modalConfig.userName}? They will not be able to access the system.`
+            }
+            confirmText="Yes"
+            cancelText="No"
+            variant={modalConfig.action === "approved" ? "success" : "danger"}
+            isLoading={loadingUserId === modalConfig.userId}
+          />
+
           <div className="bg-white/80 rounded-lg shadow-sm overflow-hidden backdrop-blur-sm glass-morphism">
             <div className="p-4 sm:p-6 border-b border-gray-200">
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
@@ -327,10 +383,14 @@ export default function UsersPage() {
                               </td>
                               <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium">
                                 <div className="flex space-x-3 items-center justify-center">
-                                {/* Approve Button */}
-                                <Button
+                                  {/* Approve Button */}
+                                  <Button
                                     onClick={() =>
-                                      handleStatusChange(uid, "approved")
+                                      openConfirmationModal(
+                                        uid,
+                                        "approved",
+                                        u.name || u.username
+                                      )
                                     }
                                     disabled={
                                       u.isApproved === "approved" ||
@@ -363,7 +423,11 @@ export default function UsersPage() {
                                   {/* Decline Button */}
                                   <Button
                                     onClick={() =>
-                                      handleStatusChange(uid, "declined")
+                                      openConfirmationModal(
+                                        uid,
+                                        "declined",
+                                        u.name || u.username
+                                      )
                                     }
                                     disabled={
                                       u.isApproved === "declined" ||
@@ -531,6 +595,6 @@ export default function UsersPage() {
           </div>
         </main>
       </div>
-    </ProtectedRoute> 
+    </ProtectedRoute>
   );
 }

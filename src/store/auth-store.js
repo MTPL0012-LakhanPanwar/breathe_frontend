@@ -1,9 +1,8 @@
-// lib/auth-store.js
 "use client";
 
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { apiService } from "./api-service";
+import { authService } from "../lib/auth-service";
 
 export const useAuthStore = create(
   devtools((set, get) => ({
@@ -17,13 +16,11 @@ export const useAuthStore = create(
     isLoading: false,
     isLoadingUsers: false,
     isLoadingProfile: false,
-    isLoadingChat: false,
 
     // --- Error States ---
     error: null,
     usersError: null,
     profileError: null,
-    chatError: null,
 
     // --- Success States ---
     successMessage: null,
@@ -31,7 +28,6 @@ export const useAuthStore = create(
     // --- Data States ---
     users: [],
     currentProfile: null,
-    chatMessages: [],
 
     // --- UI State ---
     activeTab: "chat",
@@ -68,7 +64,7 @@ export const useAuthStore = create(
     login: async (credentials) => {
       set({ isLoading: true, error: null });
       try {
-        const data = await apiService.login(credentials);
+        const data = await authService.login(credentials);
 
         localStorage.setItem("access_token", data.access_token);
         localStorage.setItem("refresh_token", data.refresh_token);
@@ -95,7 +91,7 @@ export const useAuthStore = create(
     signup: async (userData) => {
       set({ isLoading: true, error: null });
       try {
-        const data = await apiService.signup(userData);
+        const data = await authService.signup(userData);
 
         localStorage.setItem("user", JSON.stringify(data));
 
@@ -120,7 +116,7 @@ export const useAuthStore = create(
           payload.access_token = access_token;
         }
 
-        const data = await apiService.socialLogin(payload);
+        const data = await authService.socialLogin(payload);
 
         localStorage.setItem("access_token", data.access_token);
         localStorage.setItem("refresh_token", data.refresh_token);
@@ -157,7 +153,6 @@ export const useAuthStore = create(
         error: null,
         users: [],
         currentProfile: null,
-        chatMessages: [],
         activeTab: "chat",
       });
     },
@@ -169,7 +164,7 @@ export const useAuthStore = create(
 
       set({ isLoadingUsers: true, usersError: null });
       try {
-        const data = await apiService.getUsers(accessToken);
+        const data = await authService.getUsers(accessToken);
         set({ users: data, isLoadingUsers: false, usersError: null });
         return { success: true, data };
       } catch (error) {
@@ -185,7 +180,7 @@ export const useAuthStore = create(
 
       set({ isLoading: true, error: null });
       try {
-        const data = await apiService.updateUserApproval(
+        const data = await authService.updateUserApproval(
           userId,
           isApproved,
           accessToken
@@ -212,7 +207,7 @@ export const useAuthStore = create(
 
       set({ isLoadingProfile: true, profileError: null });
       try {
-        const data = await apiService.getUserProfile(accessToken);
+        const data = await authService.getUserProfile(accessToken);
         set({
           currentProfile: data,
           user: data, // Update the stored user as well
@@ -233,7 +228,7 @@ export const useAuthStore = create(
 
       set({ isLoadingProfile: true, profileError: null });
       try {
-        const data = await apiService.updateProfile(profileData, accessToken);
+        const data = await authService.updateProfile(profileData, accessToken);
         set({
           currentProfile: data,
           user: data, // Update local user
@@ -253,12 +248,14 @@ export const useAuthStore = create(
     changePassword: async (payload) => {
       const { accessToken } = get();
       if (!accessToken) return { success: false, error: "No access token" };
-    
+
       set({ isLoading: true, error: null });
       try {
-        const data = await apiService.changePassword(payload, accessToken);
+        const data = await authService.changePassword(payload, accessToken);
         set({ isLoading: false });
-        get().setSuccessMessage(data.message || "Password changed successfully!");
+        get().setSuccessMessage(
+          data.message || "Password changed successfully!"
+        );
         return { success: true, data };
       } catch (error) {
         const errorMsg = error.message || "Failed to change password";
@@ -267,20 +264,20 @@ export const useAuthStore = create(
         return { success: false, error: errorMsg };
       }
     },
-    
+
     deleteAccount: async () => {
       const { accessToken } = get();
       if (!accessToken) return { success: false, error: "No access token" };
-    
+
       set({ isLoading: true, error: null });
       try {
-        const data = await apiService.deleteAccount(accessToken);
-    
+        const data = await authService.deleteAccount(accessToken);
+
         // Clear local storage
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
         localStorage.removeItem("user");
-    
+
         set({
           user: null,
           accessToken: null,
@@ -288,48 +285,11 @@ export const useAuthStore = create(
           isAuthenticated: false,
           isLoading: false,
         });
-    
+
         return { success: true, data };
       } catch (error) {
         const errorMsg = error.message || "Failed to delete account";
         set({ isLoading: false, error: errorMsg });
-        return { success: false, error: errorMsg };
-      }
-    },
-
-    // --- Chat ---
-    sendChatMessage: async (input) => {
-      const { accessToken, chatMessages } = get();
-      if (!accessToken) return { success: false, error: "No access token" };
-
-      set({ isLoadingChat: true, chatError: null });
-
-      const userMessage = {
-        type: "user",
-        content: input,
-        timestamp: new Date(),
-      };
-      const updatedMessages = [...chatMessages, userMessage];
-      set({ chatMessages: updatedMessages });
-
-      try {
-        const data = await apiService.sendMessage(input, accessToken);
-
-        const botMessage = {
-          type: "bot",
-          content: data.response,
-          timestamp: new Date(),
-        };
-        set({
-          chatMessages: [...updatedMessages, botMessage],
-          isLoadingChat: false,
-          chatError: null,
-        });
-
-        return { success: true, data };
-      } catch (error) {
-        const errorMsg = error.message || "Failed to send message";
-        set({ isLoadingChat: false, chatError: errorMsg });
         return { success: false, error: errorMsg };
       }
     },
